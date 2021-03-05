@@ -1,5 +1,7 @@
 import numpy as np
 from pybdm import BDM
+import pandas
+
 
 class agent:
 
@@ -77,18 +79,22 @@ class agent:
 		# function of runtime, working memory, prediction accuracy and program length respectively, defined for the specific UTM (ULBA).
 		# self.w_nu = nu_c * nu_s * nu_a * nu_l
 		
-		# Create dataset, initialize 1-dim BDM object (at least of length 12), compute BDM
+		# Create dataset, initialize 1-dim BDM object (at least of length 12), compute BDM and LD, predict based on lowest BDM
 		h_e = np.random.randint(low=0, high=2, dtype=int, size=11)
 		aprxKC = BDM(ndim=1)
 		minKC = 10000
+		ld_db = pandas.read_csv('logicalDepthsBinaryStrings.csv',names=['BinaryString', 'LogicalDepth'],dtype={'BinaryString': object,'LogicalDepth': int}) # https://github.com/algorithmicnaturelab/OACC/blob/master/data/logicalDepthsBinaryStrings.csv
 		for i in self.E:
 			data = np.append(h_e, i)
 			nu_l = aprxKC.bdm(data)
 			if nu_l < minKC:
 				minKC = nu_l
 				self.rho_t = i
-			print(data,nu_l)
-		print(self.rho_t)
+			data_str = ""
+			for b in data: data_str = data_str+str(b)
+			ld = ld_db[ld_db['BinaryString'].dropna().str.fullmatch(data_str)]['LogicalDepth'].values[0]
+			print(data,"BDM:",nu_l,"LD:",ld)
+		print("Prediction:",self.rho_t)
 		
 	def runStep(self):
 	
