@@ -10,5 +10,5 @@ ALife path to AGI, by combining MC-AIXI-tl with Universal Constructor in Python
 * v06: Agent testing code without quines. Agent function to calculate BDM and logical depth of perception history and predictions. Choose prediction based on lowest BDM.
 * v07: OpenAI gym guessing game tested as an environment.
 * v08: Build environment as a OpenQASM code of Bell state and return perception of neighbour qubits in Z-basis measurement.
-* v09: [TBD] Agent neighbours based on quantum interaction graph and observer states with 3 axis measure action.
-* v10: [TBD] Basis selection policy.
+* v09: Per qubit 3 axis measure action. Basis selection policy based on BDM of percept history of tomographic basis.
+* v10: [TBD] Agent neighbours based on quantum interaction graph.
