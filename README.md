@@ -1,5 +1,7 @@
 # AutomatedQuantumPhysicist
 
+Latest pre-release : v09 [![DOI](https://zenodo.org/badge/342195575.svg)](https://zenodo.org/badge/latestdoi/342195575)
+
 Artificial-Life + General-Reinforcement-Learning + Digital-Physics
 
 ### Suggestive titles
@@ -49,5 +51,3 @@ Note: order of ugrades subject to change (plus denote near-term focus).
 * [The Online Algorithmic Complexity Calculator](http://complexitycalculator.com/)
 * [Law without law: from observer states to physics via algorithmic information theory](https://quantum-journal.org/papers/q-2020-07-20-301/)
 * [Estimating Algorithmic Information Using Quantum Computing for Genomics Applications](https://www.mdpi.com/2076-3417/11/6/2696)
-
-### Cite this as
