@@ -1,4 +1,4 @@
-# GoedelConstructor
+# AutomatedQuantumPhysicist
 
 Artificial-Life + General-Reinforcement-Learning + Digital-Physics
 
@@ -39,6 +39,7 @@ Artificial-Life + General-Reinforcement-Learning + Digital-Physics
 * v23: BraIIinSSss!
 * v24: BraIIinSSss!
 * v25: BraIIinSSss!
+
 Note: order of ugrades subject to change (plus denote near-term focus).
 
 ### Important references
