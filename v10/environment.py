@@ -22,8 +22,8 @@ class environment:
 		
 		circ = QuantumCircuit.from_qasm_file(self.OpenQASM)
 		if (not self.allZ):
-			if len(self.basis) == neighbours:
-				for n in range(0,neighbours):
+			if len(self.basis) == len(neighbours):
+				for n in neighbours:
 					if self.basis[n] == 1:
 						# circ.ry(pi/2,n) # for measuring along -X
 						circ.ry(-pi/2,n) # for measuring along X
@@ -31,7 +31,7 @@ class environment:
 						circ.rx(pi/2,n) # for measuring along Y	
 			else:
 				print("Error: Not all measurement basis defined by agent. Default All-Z basis is selected.")
-		for n in range(0,neighbours):
+		for n in neighbours:
 			circ.measure(n,n)
 		# print(circ.draw())
 		result = execute(circ, self.simulator, shots=1, memory=True).result()

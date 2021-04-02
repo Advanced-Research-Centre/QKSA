@@ -1,4 +1,4 @@
-# AutomatedQuantumPhysicist
+# AutonomousQuantumPhysicist
 
 Latest pre-release : v09 [![DOI](https://zenodo.org/badge/342195575.svg)](https://zenodo.org/badge/latestdoi/342195575)
 
@@ -10,7 +10,7 @@ Artificial-Life + General-Reinforcement-Learning + Digital-Physics
 * Participatory Observer States to Quantum Physics using Evolving Universal Reinforcement Learning Self-Replicating Agents
 * Evolving universal AGI agents for discovering physical laws
 * Fittest of the fittest artificial physicists: using
-* Agent Based Modelling of Foundational Experiment in Quantum Environments
+* Agent Based Modelsling of Foundational Experiment in Quantum Environments
 * Automated (Gate-based) Quantum Experiments using Universal Evolving Constructors
 
 ### Version changelog
@@ -23,24 +23,22 @@ Artificial-Life + General-Reinforcement-Learning + Digital-Physics
 * v07: OpenAI gym guessing game tested as an environment.
 * v08: Build environment as a OpenQASM code of Bell state and return perception of neighbour qubits in Z-basis measurement.
 * v09: Per qubit 3 axis measure action. Basis selection policy based on BDM of percept history of tomographic basis.
+* v10: Integrate test environment with agent. Structured LEAST model and policy. Tested random Pauli environment for 2 and 3 qubits.
 
 ### Planned upgrades
-* v10: Hidden and visible qubits. GHZ test with 2 visible qubits. ++++
-* v11: Neighbour/visible qubits based on quantum interaction graph. ++
-* v12: Quantum Kolmogorov Complexity as a metric for quantum agents with entanglement. +
-* v13: Quantum Entanglement Entropy and Mutual Information as a function of number of visible qubits for quantum agents. +
-* v14: Smart tomography based on TM Solomonoff induction instead of NN. +++
-* v15: Integrate test environment with agent. ++++
-* v16: Formulate reward and replication policy for tomography. Integrate agent with Goedel machine. +++
-* v17: Hypervisor for automatic threaded execution of generated quines. ++
-* v18: Quantum Cellular Automata Rule/Composibility Learning. +
-* v19: Explainable Ansatz Learning for Variational Quantum Circuits. +
-* v20: Integrate qThought and extended Wigner's friend experiments. +
-* v21: Neuro-evolution and NTM as an alternative for AIXI. +
-* v22: BraIIinSSss!
-* v23: BraIIinSSss!
-* v24: BraIIinSSss!
-* v25: BraIIinSSss!
+* Hidden and visible qubits. GHZ test with 2 visible qubits. ++++
+* Neighbour/visible qubits based on quantum interaction graph. ++
+* Quantum Kolmogorov Complexity as a metric for quantum agents with entanglement. +
+* Quantum Entanglement Entropy and Mutual Information as a function of number of visible qubits for quantum agents. +
+* Smart tomography based on TM Solomonoff induction instead of NN. +++
+* Formulate reward and replication policy for tomography. Integrate agent with Goedel machine. +++
+* Hypervisor for automatic threaded execution of generated quines. ++
+* Quantum Cellular Automata Rule/Composibility Learning. +
+* Explainable Ansatz Learning for Variational Quantum Circuits. +
+* Integrate qThought and extended Wigner's friend experiments. +
+* Neuro-evolution and NTM as an alternative for AIXI. +
+* BraIIinSSss!
+* mOoorEEe BraIIinSSss!
 
 Note: order of ugrades subject to change (plus denote near-term focus).
 

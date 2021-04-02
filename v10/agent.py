@@ -1,7 +1,7 @@
 import numpy as np
 from pybdm import BDM
 import pandas
-
+from math import pi, floor
 
 class agent:
 
@@ -20,7 +20,7 @@ class agent:
 	A = []			# action space.
 						
 	e_t = 0			# perception recorded by the agent at time step t.
-	E = []			# percept space.
+	E = []			# percept space. all bitstrings of the same size as the number of entries in neighbours
 						
 	nu = 0			# a model of the environment.
 	w_nu = 0		# weight assigned to a model based on EAIT metric.
@@ -36,8 +36,11 @@ class agent:
 	lifeSpan = 0	# max age of agent before death
 	
 	trials = 20		# number of tomographic trials in growing phase
+	history = []
 	
 	env = []
+	neighbours = []	# qubit ids of neighbours
+	boundary = 0	# number of neighbours
 
 	def __init__(self, genes, env):
 		
@@ -49,44 +52,78 @@ class agent:
 		# Mutable Genes
 		self.R_D = genes[0]
 		self.R_R = genes[1]
-		self.E = genes[2]
+		
+		self.neighbours = genes[2]
 		self.lifeSpan = genes[3]
 		
 		self.env = env
 		
 		self.R_t = self.R_R # for testing
+		self.boundary = len(self.neighbours)
+		self.history = np.empty((pow(3,self.boundary),self.trials),dtype='object')
 		
 		print("Agent Alive and Ticking")
 
-	def policy(step, percept):
+	def LEAST(self, nu_least):
 
-		global neighbours, trials
-		reqdTrials = pow(3,neighbours)
-		basis = [0] * neighbours
-		# there is always a first time
-		if percept == []: 
-			global history
-			history = np.empty((reqdTrials,trials),dtype='object')
+		# this function mutates
+		wt_least = [1, 0, 0, 0, 0]	# consider only program length for now
+		estLambda = 0
+		for i in range(0,len(wt_least)):
+			estLambda += wt_least[i]*nu_least[i]
+		return estLambda
+
+	def Lambda(self, data):
+	
+		# function of runtime, working memory, model approximation, energy and program length respectively, defined for the specific UTM (ULBA).
+		aprxKC = BDM(ndim=1)
+		nu_l = aprxKC.bdm(data)
+		
+		nu_e = 0
+
+		nu_a = 0
+		
+		nu_s = 0
+
+		if len(data) < 13:	# LUT only till length 12, TBD: Sliding window Logical Depth
+			ld_db = pandas.read_csv('logicalDepthsBinaryStrings.csv',names=['BinaryString', 'LogicalDepth'],dtype={'BinaryString': object,'LogicalDepth': int}) # https://github.com/algorithmicnaturelab/OACC/blob/master/data/logicalDepthsBinaryStrings.csv
+			data_str = ""
+			for b in data: data_str = data_str+str(b)
+			nu_t = ld_db[ld_db['BinaryString'].dropna().str.fullmatch(data_str)]['LogicalDepth'].values[0]
+		else:
+			nu_t = 0
+		
+		nu_least = [nu_l, nu_e, nu_a, nu_s, nu_t]
+		
+		return self.LEAST(nu_least)
+
+	def policy(self):
+
+		basis = [0] * self.boundary			
+		reqdTrials = pow(3,self.boundary)
+		# measure in all-Z for first time
+		if self.age == 0:
+			pass
 		# sequentially try out all Pauli basis combinations of neighbouring qubits for 10 cycles
-		elif step < reqdTrials*trials:
-			pb = np.base_repr(floor(step/trials), base=3, padding=neighbours)
-			pb = pb[len(pb)-neighbours:]
+		elif self.age < reqdTrials*self.trials:
+			pb = np.base_repr(floor(self.age/self.trials), base=3, padding=self.boundary)
+			pb = pb[len(pb)-self.boundary:]
 			for i in range(0,len(pb)):
 				basis[i] = int(pb[i])
 		# select winning policy as the one with the lowest K-complexity of the percept history 
 		else:
-			minKC = 10000
+			minLambda = 10000
+			action_best = basis
 			for i in range(0,reqdTrials):
-				PBhist = ''.join(history[i])
+				PBhist = ''.join(self.history[i])
 				data = np.array(list(PBhist)).astype(np.int)
-				aprxKC = BDM(ndim=1)
-				nu_l = aprxKC.bdm(data)
-				print(PBhist,nu_l)
-				if nu_l < minKC:
-					minKC = nu_l
-					basis_best = i
-			pb = np.base_repr(basis_best, base=3, padding=neighbours)
-			pb = pb[len(pb)-neighbours:]
+				estLambda = self.Lambda(data)	# TBD: append predicted action
+				print(PBhist, estLambda)
+				if estLambda < minLambda:
+					minLambda = estLambda
+					action_best = i
+			pb = np.base_repr(action_best, base=3, padding=self.boundary)
+			pb = pb[len(pb)-self.boundary:]
 			for i in range(0,len(pb)):
 				basis[i] = int(pb[i])
 			print("Best basis : ",basis)
@@ -96,21 +133,21 @@ class agent:
 	
 		# self.a_t = self.A[0]
 		# self.h_t.append(self.a_t)	# delete old history
-		basis = policy(step, percept)
-		env.setBasis(basis)
+		basis = self.policy()
+		self.env.setBasis(basis)
 	
 	def predict(self):
 	
+		print("Predict")
 		# self.rho_t = self.E[0]
 		# self.h_t.append(self.rho_t) # delete old history
 		
 	def perceive(self):
 	
-		# self.e_t = input("\nPerceive Environment: ")
+		self.e_t = self.env.measure(self.neighbours)
 		# check if e_t is a member of the set E, else raise error
-		percept = env.measure(neighbours)
-		if step < pow(3,neighbours)*trials: 
-			history[floor(step/trials)][step%trials] = percept[0]
+		if self.age < pow(3,self.boundary)*self.trials: 
+			self.history[floor(self.age/self.trials)][self.age%self.trials] = self.e_t[0]
 	
 	def Delta(self):
 	
@@ -125,31 +162,9 @@ class agent:
 	
 		self.R_t = self.r_t
 
-	def Lambda(self):
-	
-		# function of runtime, working memory, prediction accuracy and program length respectively, defined for the specific UTM (ULBA).
-		# self.w_nu = nu_c * nu_s * nu_a * nu_l
-		
-		# Create dataset, initialize 1-dim BDM object (at least of length 12), compute BDM and LD, predict based on lowest BDM
-		h_e = np.random.randint(low=0, high=2, dtype=int, size=11)
-		aprxKC = BDM(ndim=1)
-		minKC = 10000
-		ld_db = pandas.read_csv('logicalDepthsBinaryStrings.csv',names=['BinaryString', 'LogicalDepth'],dtype={'BinaryString': object,'LogicalDepth': int}) # https://github.com/algorithmicnaturelab/OACC/blob/master/data/logicalDepthsBinaryStrings.csv
-		for i in self.E:
-			data = np.append(h_e, i)
-			nu_l = aprxKC.bdm(data)
-			if nu_l < minKC:
-				minKC = nu_l
-				self.rho_t = i
-			data_str = ""
-			for b in data: data_str = data_str+str(b)
-			ld = ld_db[ld_db['BinaryString'].dropna().str.fullmatch(data_str)]['LogicalDepth'].values[0]
-			print(data,"BDM:",nu_l,"LD:",ld)
-		print("Prediction:",self.rho_t)
-		
 	def runStep(self):
 						
-		print("Life goes on... a step at a time ",self.age)
+		# print("Life goes on... a step at a time ",self.age)
 		
 		self.act()
 		# self.predict()
