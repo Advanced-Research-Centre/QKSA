@@ -1,9 +1,34 @@
+'''
+	##############
+	# How to run #
+	##############
+
+		# from environment import environment
+		# env = environment("env.qasm")
+		
+		# from agent import agent
+		# genes = [...] 							# add initial value of genes
+		# agt = agent(env,genes)
+
+		# agt.run()
+
+'''
+
 import numpy as np
 from pybdm import BDM
 import pandas
 from math import pi, floor
 
 class agent:
+
+	genes = []
+
+	env = []
+	neighbours = []	# qubit ids of neighbours
+	boundary = 0	# number of neighbours
+
+	c_gene = ""
+	wt_gene = []
 
 	R_D = 0			# reward threshold for death. If R_t < R_D the agent halts (dies).
 	R_R = 0			# reward threshold for reproduction. If R_D < R_t < R_R, the agent self-replicates with some stochastic mutation in its hyper-parameters like t_p,m,A,Lambda_U,gamma,R_D,R_R.
@@ -33,38 +58,39 @@ class agent:
 	h_t = []		# total history of actions, predictions and perceptions in the time window t-t_p to t-1
 		
 	t = 0			# age of agent in number of runStep calls
-	lifeSpan = 0	# max age of agent before death
+	lifespan = 0	# max age of agent before death
 	
 	trials = 20		# number of tomographic trials in growing phase
 	history = []
 	
-	env = []
-	neighbours = []	# qubit ids of neighbours
-	boundary = 0	# number of neighbours
-
 	def __init__(self, env, *genes):
 				
 		self.env = env
+		self.genes = genes
+
 		self.neighbours = genes[0]
 		self.boundary = len(self.neighbours)
 		self.history = np.empty((pow(3,self.boundary),self.trials),dtype='object')
 
+		self.c_gene		= "F0F0F0V0V1V2F0V3V4" 		# genes[1] 	# Initial Seed AI simple cost function
+		self.wt_gene	= [1, 0, 0, 0, 0]			# genes[2]	# Consider only program length for now
+
 		# Initialize (optionally) mutable hyper-parameters
-		self.l_max	= genes[1]	
-		self.e_max	= 0	
-		self.a_max	= 0	
-		self.s_max	= 0	
-		self.t_max	= genes[2]	
-		self.m_c	= genes[3]	
-		self.m		= 2			# binary alphabet
-		self.n		= 5			# based on ACSS specification for BDM
-		self.s_c	= 0	
-		self.t_p	= genes[4]	
-		self.t_f	= 1	
-		self.gamma	= genes[5]	
-		self.R_D	= genes[6]	
-		self.R_R	= genes[7]	
-		self.t_max	= genes[8]	
+		self.l_max		= genes[3]	
+		self.e_max		= 0							# genes[4]	# Currently not considered
+		self.a_max		= 0							# genes[5]	# Currently not considered
+		self.s_max		= 0							# genes[6]	# Currently not considered
+		self.t_max		= genes[7]	
+		self.m_c		= genes[8]	
+		self.m			= 2							# genes[9]	# binary alphabet
+		self.n			= 5							# genes[10]	# based on ACSS specification for BDM
+		self.s_c		= 0							# genes[11]	# Currently not considered	
+		self.t_p		= genes[12]	
+		self.t_f		= 1							# genes[13]	# Single step in the future	
+		self.gamma		= genes[14]	
+		self.R_D		= genes[15]	
+		self.R_R		= genes[16]	
+		self.lifespan	= genes[17]	
 
 		self.t		= 0
 		self.R_t 	= (self.R_D + self.R_R) / 2
@@ -72,6 +98,18 @@ class agent:
 		self.hist	= []
 
 		print("Agent Alive and Ticking")
+	
+	def act(self):
+		# self.a_t = self.A[0]
+		# self.h_t.append(self.a_t)	# delete old history
+		basis = self.policy()
+		self.env.setBasis(basis)
+
+	def perceive(self):
+		self.e_t = self.env.measure(self.neighbours)
+		# check if e_t is a member of the set E, else raise error
+		if self.age < pow(3,self.boundary)*self.trials: 
+			self.history[floor(self.age/self.trials)][self.age%self.trials] = self.e_t[0]
 
 	def L_est(self, data):
 		# Function to estimate the program length
@@ -104,26 +142,20 @@ class agent:
 			t_est = ld_db[ld_db['BinaryString'].dropna().str.fullmatch(data_str)]['LogicalDepth'].values[0]
 		return t_est
 
-	def c(self):
-		c_gene = "F0F0F0V0V1V2F0V3V4" 	# Initial Seed AI simple cost function
-		wt_gene = [1, 0, 0, 0, 0]			# Consider only program length for now
-		return [c_gene, wt_gene]
-
 	def c_est(self, data):
 		# Cost estimator using LEAST metric and cost function 
-		[c_gene, wt_gene] = self.c()
 		est_least = [self.L_est(data), self.E_est(data), self.A_est(data), self.S_est(data), self.T_est(data)]
-		wt_least_est = [wt_gene[i] * est_least[i] for i in range(5)]
+		wt_least_est = [self.wt_gene[i] * est_least[i] for i in range(5)]
 		stack = []
-		for c in range(len(c_gene)-2,-1,-2):
-			if c_gene[c] == 'V':
-				stack.append(wt_least_est[int(c_gene[c+1])])
+		for c in range(len(self.c_gene)-2,-1,-2):
+			if self.c_gene[c] == 'V':
+				stack.append(wt_least_est[int(self.c_gene[c+1])])
 			else:
 				o1 = stack.pop()
 				o2 = stack.pop()
-				if c_gene[c+1] == '0':
+				if self.c_gene[c+1] == '0':
 					stack.append(o1 + o2)		# F0: addition
-				elif c_gene[c+1] == '1':
+				elif self.c_gene[c+1] == '1':
 					stack.append(o1 * o2)		# F1: multiplication
 		c_est = stack.pop()
 		return c_est
@@ -136,14 +168,12 @@ class agent:
 		return ('0'*(l-len(s)))+s
 
 	def define_A(self, numQb):
-		global A
 		# define action space A as all 3-axis basis of numQb qubits
 		for i in range(3**numQb):
 			self.A.append(self.DecToBaseN(i,3,numQb))
 
 	def define_E(self, numQb):
 		# Define percept space E as all binary strings of numQb qubits
-		global E
 		for i in range(2**numQb):
 			self.E.append(self.DecToBaseN(i,2,numQb))
 	
@@ -186,48 +216,41 @@ class agent:
 				basis[i] = int(pb[i])
 			print("Best basis : ",basis)
 		return basis
-	
-	def act(self):
-	
-		# self.a_t = self.A[0]
-		# self.h_t.append(self.a_t)	# delete old history
-		basis = self.policy()
-		self.env.setBasis(basis)
-	
-	def predict(self):
-	
-		print("Predict")
-		# self.rho_t = self.E[0]
-		# self.h_t.append(self.rho_t) # delete old history
-		
-	def perceive(self):
-	
-		self.e_t = self.env.measure(self.neighbours)
-		# check if e_t is a member of the set E, else raise error
-		if self.age < pow(3,self.boundary)*self.trials: 
-			self.history[floor(self.age/self.trials)][self.age%self.trials] = self.e_t[0]
 
+	def calcReturn(self):
+		# \item[] $r_t=-\Delta(\rho^*_t,e_t)$
+        # \item[] hist.\textit{append}$(a^*_t,e_t)$
+        # \item[] $r_{hist}.$\textit{append}$(r_t)$
+        # \item[] $R_t = 0$ 
+        # \item[] for $i$ in range$(t_{min},t)$:
+        # \begin{itemize}[noitemsep,nolistsep]
+        #     \item[] $R_t += \gamma_i * r_{hist}[i]$
+        # \end{itemize}
+		return
 
-	def Return(self):
-	
-		self.R_t = self.r_t
+	def mutate(self):
+		# mutate c_gene, wt_gene and other optional genes
+		genes_new = self.genes
+		return genes_new
 
-	def runStep(self):
-						
-		# print("Life goes on... a step at a time ",self.age)
-		
-		self.act()
-		# self.predict()
-		self.perceive()
-		# self.Delta()
-		# self.Return()
-		
-		self.age += 1
-		if self.age == self.lifeSpan:
-			return [True, self.R_t < self.R_R]
-		return [self.R_t < self.R_D, self.R_t < self.R_R] 
+	def constructor(self, genes):
+		# add Quine code here
+		# offload file execution to OS
+		return
 
-
+	def run(self):
+		while (self.t < self.lifespan):
+			if (self.R_D < self.R_t):	# Halt agent (die)
+				break					
+			self.policy()
+			self.act()
+			self.perceive()
+			self.calcReturn()
+			if (self.R_t < self.R_R):	# Reproduce
+				genes_new = self.mutate(genes)
+				self.constructor(genes_new)
+			self.t += 1
+				
 ##############
 # Unit tests #
 ##############
