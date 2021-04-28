@@ -1,115 +1,65 @@
-'''
-	##############
-	# How to run #
-	##############
-
-		# from environment import environment
-		# env = environment("env.qasm")
-		
-		# from agent import agent
-		# genes = [...] 							# add initial value of genes
-		# agt = agent(env,genes)
-
-		# agt.run()
-
-'''
-
 import numpy as np
 from pybdm import BDM
 import pandas
 from math import pi, floor
+from numpy_ringbuffer import RingBuffer		# pip install numpy_ringbuffer
+import random
 
 class agent:
-
-	genes = []
-
-	env = []
-	neighbours = []	# qubit ids of neighbours
-	boundary = 0	# number of neighbours
-
-	c_gene = ""
-	wt_gene = []
-
-	R_D = 0			# reward threshold for death. If R_t < R_D the agent halts (dies).
-	R_R = 0			# reward threshold for reproduction. If R_D < R_t < R_R, the agent self-replicates with some stochastic mutation in its hyper-parameters like t_p,m,A,Lambda_U,gamma,R_D,R_R.
-						
-	R_t = 0			# cumulative discounted return at time step t.
-						
-	t_p = 0 		# number of time steps in the past that is considered by the agent at each point in time.
-	t_f = 0			# number of time steps that the agent predicts in the future.
-						
-	n	= 0 		# alphabet size of the UTM that the agent uses for modeling.
-	m 	= 0			# state size of the UTM that the agent uses for modeling.
-						
-	a_t = 0			# action performed by the agent at time step t.
-	A = []			# action space.
-						
-	e_t = 0			# perception recorded by the agent at time step t.
-	E = []			# percept space. all bitstrings of the same size as the number of entries in neighbours
-						
-	nu = 0			# a model of the environment.
-	w_nu = 0		# weight assigned to a model based on EAIT metric.
-	
-	rho_t = 0		# prediction of the perception e_t made at time step t-1.
+				
 	pi_t = 0		# policy for choosing an optimal action and maximizing return at time step t.
-	gamma_t = 0		# reward discount that is proportional to the time span between the reward step and the current time step.
-	r_t = 0			# reward at time step t based on a distance measure.
-	
-	h_t = []		# total history of actions, predictions and perceptions in the time window t-t_p to t-1
-		
-	t = 0			# age of agent in number of runStep calls
-	lifespan = 0	# max age of agent before death
-	
 	trials = 20		# number of tomographic trials in growing phase
 	history = []
 	
-	def __init__(self, env, *genes):
+	def __init__(self, env, genes):
 				
 		self.env = env
 		self.genes = genes
 
 		self.neighbours = genes[0]
 		self.boundary = len(self.neighbours)
-		self.history = np.empty((pow(3,self.boundary),self.trials),dtype='object')
+		self.define_A(self.boundary)						# Action space
+		self.define_E(self.boundary)						# Percept space
+		# self.history = np.empty((pow(3,self.boundary),self.trials),dtype='object')
 
-		self.c_gene		= "F0F0F0V0V1V2F0V3V4" 		# genes[1] 	# Initial Seed AI simple cost function
-		self.wt_gene	= [1, 0, 0, 0, 0]			# genes[2]	# Consider only program length for now
+		self.c_gene		= genes[1]
+		self.wt_gene	= genes[2]
 
 		# Initialize (optionally) mutable hyper-parameters
 		self.l_max		= genes[3]	
-		self.e_max		= 0							# genes[4]	# Currently not considered
-		self.a_max		= 0							# genes[5]	# Currently not considered
-		self.s_max		= 0							# genes[6]	# Currently not considered
+		self.e_max		= genes[4]
+		self.a_max		= genes[5]
+		self.s_max		= genes[6]
 		self.t_max		= genes[7]	
 		self.m_c		= genes[8]	
-		self.m			= 2							# genes[9]	# binary alphabet
-		self.n			= 5							# genes[10]	# based on ACSS specification for BDM
-		self.s_c		= 0							# genes[11]	# Currently not considered	
+		self.m			= genes[9]	
+		self.n			= genes[10]	
+		self.s_c		= genes[11]	
 		self.t_p		= genes[12]	
-		self.t_f		= 1							# genes[13]	# Single step in the future	
+		self.t_f		= genes[13]
 		self.gamma		= genes[14]	
 		self.R_D		= genes[15]	
 		self.R_R		= genes[16]	
 		self.lifespan	= genes[17]	
 
-		self.t		= 0
-		self.R_t 	= (self.R_D + self.R_R) / 2
-		self.rhist	= []
-		self.hist	= []
+		self.t			= 0									# Age of agent in number of runStep calls
+		self.R_t 		= self.R_R							# Cumulative discounted return at time step t.
+		self.hist_a		= RingBuffer(capacity=self.t_p)		# History of actions
+		self.hist_rho	= RingBuffer(capacity=self.t_p)		# History of predictions
+		self.hist_e		= RingBuffer(capacity=self.t_p)		# History of perceptions
+		self.hist_r		= RingBuffer(capacity=self.t_p)		# History of rewards
 
 		print("Agent Alive and Ticking")
-	
-	def act(self):
-		# self.a_t = self.A[0]
-		# self.h_t.append(self.a_t)	# delete old history
-		basis = self.policy()
-		self.env.setBasis(basis)
+			
+	def act(self, a_t_star):
+		self.env.setBasis(a_t_star)
+		return
 
 	def perceive(self):
-		self.e_t = self.env.measure(self.neighbours)
+		return self.E[random.randint(0, 2**self.boundary-1)]	# Test code
+		e_t = self.env.measure(self.neighbours)
 		# check if e_t is a member of the set E, else raise error
-		if self.age < pow(3,self.boundary)*self.trials: 
-			self.history[floor(self.age/self.trials)][self.age%self.trials] = self.e_t[0]
+		return e_t
 
 	def L_est(self, data):
 		# Function to estimate the program length
@@ -169,13 +119,17 @@ class agent:
 
 	def define_A(self, numQb):
 		# define action space A as all 3-axis basis of numQb qubits
+		self.A = []
 		for i in range(3**numQb):
 			self.A.append(self.DecToBaseN(i,3,numQb))
+		return
 
 	def define_E(self, numQb):
 		# Define percept space E as all binary strings of numQb qubits
+		self.E = []
 		for i in range(2**numQb):
 			self.E.append(self.DecToBaseN(i,2,numQb))
+		return
 	
 	def Delta(self, e_i, e_j):
 		# Distance function between elements in percept space
@@ -183,9 +137,10 @@ class agent:
 		for (i,j) in zip(e_i,e_j):
 			if i!=j:
 				dist_e_ij += 1					# Hamming distance
+		dist_e_ij = len(e_i) - dist_e_ij
 		return dist_e_ij
 
-	def policy(self):
+	def policyLegacy(self):
 
 		basis = [0] * self.boundary			
 		reqdTrials = pow(3,self.boundary)
@@ -217,15 +172,18 @@ class agent:
 			print("Best basis : ",basis)
 		return basis
 
+	def policy(self):
+		a_t_star = self.A[0]				# Optimal action for the agent determined by the policy at time step t	
+		rho_t_star = self.E[0]				# Prediction of the perception e_t made at time step t
+
+		# add code here ..........
+
+		return [a_t_star, rho_t_star]
+
 	def calcReturn(self):
-		# \item[] $r_t=-\Delta(\rho^*_t,e_t)$
-        # \item[] hist.\textit{append}$(a^*_t,e_t)$
-        # \item[] $r_{hist}.$\textit{append}$(r_t)$
-        # \item[] $R_t = 0$ 
-        # \item[] for $i$ in range$(t_{min},t)$:
-        # \begin{itemize}[noitemsep,nolistsep]
-        #     \item[] $R_t += \gamma_i * r_{hist}[i]$
-        # \end{itemize}
+		self.R_t = 0
+		for i in range(self.t_p_max-1,-1,-1):
+			self.R_t += self.hist_r[i] * (1 - self.gamma*(self.t_p_max-i))
 		return
 
 	def mutate(self):
@@ -240,34 +198,83 @@ class agent:
 
 	def run(self):
 		while (self.t < self.lifespan):
-			if (self.R_D < self.R_t):	# Halt agent (die)
-				break					
-			self.policy()
-			self.act()
-			self.perceive()
+			if (self.R_t < self.R_D):	# Halt agent (die)
+				print("The input and program conspired against my eternal life")
+				return
+			self.t_p_max = self.t if (self.t-self.t_p) < 0 else self.t_p	 # How much historic data is available (adjusted for initial few steps)
+
+			[a_t_star, rho_t_star] = self.policy()
+			
+			self.hist_a.append(a_t_star)
+			self.act(a_t_star)
+
+			self.hist_rho.append(rho_t_star)
+
+			e_t = self.perceive()				# Perception recorded by the agent at time step t.
+			self.hist_e.append(e_t)
+			
+			r_t = self.Delta(rho_t_star, e_t)	# Reward based on Hamming distance between perception and prediction
+			self.hist_r.append(r_t)
+			
 			self.calcReturn()
+
+			print("Age =",self.t,"\t--> Action :",a_t_star,"Prediction :",rho_t_star,"Perception :",e_t,"Reward :",r_t,"Return :",self.R_t)
+
 			if (self.R_t < self.R_R):	# Reproduce
 				genes_new = self.mutate(genes)
 				self.constructor(genes_new)
 			self.t += 1
-				
+		print("Lived life to the fullest")
+		return
+
+	def test(self):
+		# Codes for unit tests
+
+		# print(self.genes)
+		# print(self.neighbours)
+		# print(self.A)
+		# print(self.E)
+		# print((self.E[0],self.E[5]),self.Delta(self.E[0],self.E[5]))
+
+		# data = np.random.randint(low=0, high=2, dtype=int, size=21)
+		# print(self.L_est(data))
+		# print(self.c_est(data))
+
+		self.run()
+
+		return
+	
 ##############
-# Unit tests #
+# How to run #
 ##############
 
-# from environment import environment
+from environment import environment
+from agent import agent
 
-# env = environment("env.qasm")
+if __name__ == "__main__":
+	
+	env = environment("env.qasm")
 
-# agt = agent(env,(0,1),30,100,0.2,10,0.1,0,0,100)
+	neighbours 	= [0, 1, 2]					# Qubit ids of neighbours
+	c_gene		= "F0F0F0V0V1V2F0V3V4" 		# Initial Seed AI simple cost function
+	wt_gene		= [1, 0, 0, 0, 0]			# Weight assigned to EAIT metrics in current LEAST c_function. Consider only program length for now
+	l_max		= 120	
+	e_max		= 0							# Currently not considered
+	a_max		= 0							# Currently not considered
+	s_max		= 0							# Currently not considered
+	t_max		= 120	
+	m_c			= 0.18
+	m			= 2							# Alphabet size of the UTM that the agent uses for modeling. Binary
+	n			= 5							# State size of the UTM that the agent uses for modeling. Based on ACSS specification for BDM
+	s_c			= 0							# Currently not considered	
+	t_p			= 10						# Number of time steps in the past considered by the agent at each point in time.
+	t_f			= 1							# Number of time steps the agent predicts in the future. Single step	
+	gamma		= 0.05						# Reward discount that is proportional to the time span between the reward step and the current time step. Linear function
+	R_D			= 0							# Reward threshold for death. If R_t < R_D the agent halts (dies).
+	R_R			= 0							# Reward threshold for reproduction. If R_D < R_t < R_R, the agent self-replicates with mutation in genes
+	lifespan	= 20						# Max age of agent before death
 
-# data = np.random.randint(low=0, high=2, dtype=int, size=21)
-# print(agt.L_est(data))
-# print(agt.c_est(data))
+	genes = [neighbours, c_gene, wt_gene, l_max, e_max, a_max, s_max, t_max, m_c, m, n, s_c, t_p, t_f, gamma, R_D, R_R, lifespan]
+	agt = agent(env, genes)
 
-# numQb = 3
-# agt.define_A(numQb)
-# print(agt.A)
-# agt.define_E(numQb)
-# print(agt.E)
-# print((agt.E[0],agt.E[5]),agt.Delta(agt.E[0],agt.E[5]))
+	agt.test()
