@@ -4,6 +4,7 @@ import pandas
 from math import pi, floor
 from numpy_ringbuffer import RingBuffer		# pip install numpy_ringbuffer
 import random
+import copy
 
 class agent:
 				
@@ -44,10 +45,10 @@ class agent:
 
 		self.t			= 0									# Age of agent in number of runStep calls
 		self.R_t 		= self.R_R							# Cumulative discounted return at time step t.
-		self.hist_a		= RingBuffer(capacity=self.t_p)		# History of actions
-		self.hist_rho	= RingBuffer(capacity=self.t_p)		# History of predictions
-		self.hist_e		= RingBuffer(capacity=self.t_p)		# History of perceptions
-		self.hist_r		= RingBuffer(capacity=self.t_p)		# History of rewards
+		self.hist_a		= RingBuffer(capacity=self.t_p, dtype='U'+str(self.boundary))		# History of actions
+		self.hist_rho	= RingBuffer(capacity=self.t_p, dtype='U'+str(self.boundary))		# History of predictions
+		self.hist_e		= RingBuffer(capacity=self.t_p, dtype='U'+str(self.boundary))		# History of perceptions
+		self.hist_r		= RingBuffer(capacity=self.t_p)										# History of rewards
 
 		print("Agent Alive and Ticking")
 			
@@ -63,6 +64,8 @@ class agent:
 
 	def L_est(self, data):
 		# Function to estimate the program length
+		if len(data) < 13:
+			return 0
 		aprxKC = BDM(ndim=1)
 		l_est = aprxKC.bdm(data)
 		return l_est
@@ -95,6 +98,8 @@ class agent:
 	def c_est(self, data):
 		# Cost estimator using LEAST metric and cost function 
 		est_least = [self.L_est(data), self.E_est(data), self.A_est(data), self.S_est(data), self.T_est(data)]
+		if (est_least[0] > self.l_max) or (est_least[1] > self.e_max) or (est_least[2] > self.a_max) or (est_least[3] > self.s_max) or (est_least[4] > self.t_max):
+			return -1
 		wt_least_est = [self.wt_gene[i] * est_least[i] for i in range(5)]
 		stack = []
 		for c in range(len(self.c_gene)-2,-1,-2):
@@ -121,14 +126,14 @@ class agent:
 		# define action space A as all 3-axis basis of numQb qubits
 		self.A = []
 		for i in range(3**numQb):
-			self.A.append(self.DecToBaseN(i,3,numQb))
+			self.A.append(str(self.DecToBaseN(i,3,numQb)))
 		return
 
 	def define_E(self, numQb):
 		# Define percept space E as all binary strings of numQb qubits
 		self.E = []
 		for i in range(2**numQb):
-			self.E.append(self.DecToBaseN(i,2,numQb))
+			self.E.append(str(self.DecToBaseN(i,2,numQb)))
 		return
 	
 	def Delta(self, e_i, e_j):
@@ -173,18 +178,44 @@ class agent:
 		return basis
 
 	def policy(self):
+		a_t = self.A[0]
 		a_t_star = self.A[0]				# Optimal action for the agent determined by the policy at time step t	
+		rho_t = self.E[0]
 		rho_t_star = self.E[0]				# Prediction of the perception e_t made at time step t
+		c_est_star = 111110					# some large number
 
-		# add code here ..........
+		def futureCone(t_fc, past_a, past_rho):
+			nonlocal a_t, a_t_star, rho_t, rho_t_star, c_est_star
+			if t_fc < self.t+self.t_f:
+				for a in self.A: 			#[0:4]:		# for testing
+					past_a_new = copy.deepcopy(past_a)
+					past_a_new.append(a)
+					if t_fc == self.t:
+						a_t = a
+					for rho in self.E:		#[0:4]: 	# for testing
+						if t_fc == self.t:
+							rho_t = rho
+						past_rho_new = copy.deepcopy(past_rho) 
+						past_rho_new.append(rho)
+						futureCone(t_fc+1, past_a_new, past_rho_new)
+			else:
+				data = ''.join(map(str, past_rho))	# currently only rho considered
+				cost = self.c_est(np.array(list(data), dtype=int))
+				# print("Past_a :",list(past_a),"Past_rho :",list(past_rho),"c_est :",cost)
+				if (cost >= 0) and (cost < c_est_star):
+						c_est_star =  cost
+						a_t_star = a_t
+						rho_t_star = rho_t
 
+		futureCone(self.t, list(self.hist_a), list(self.hist_rho))
+		
 		return [a_t_star, rho_t_star]
 
-	def calcReturn(self):
-		self.R_t = 0
+	def calcReturn(self, hist_r):
+		R_t = 0
 		for i in range(self.t_p_max-1,-1,-1):
-			self.R_t += self.hist_r[i] * (1 - self.gamma*(self.t_p_max-i))
-		return
+			R_t += hist_r[i] * (1 - self.gamma*(self.t_p_max-i))
+		return R_t
 
 	def mutate(self):
 		# mutate c_gene, wt_gene and other optional genes
@@ -216,7 +247,7 @@ class agent:
 			r_t = self.Delta(rho_t_star, e_t)	# Reward based on Hamming distance between perception and prediction
 			self.hist_r.append(r_t)
 			
-			self.calcReturn()
+			self.R_t = self.calcReturn(self.hist_r)
 
 			print("Age =",self.t,"\t--> Action :",a_t_star,"Prediction :",rho_t_star,"Perception :",e_t,"Reward :",r_t,"Return :",self.R_t)
 
@@ -239,6 +270,10 @@ class agent:
 		# data = np.random.randint(low=0, high=2, dtype=int, size=21)
 		# print(self.L_est(data))
 		# print(self.c_est(data))
+
+		# self.t_f = 2
+		# self.hist_rho = np.random.randint(low=0, high=2, dtype=int, size=21)
+		# print(self.policy())
 
 		self.run()
 
