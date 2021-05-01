@@ -1,7 +1,7 @@
 import numpy as np
 from pybdm import BDM
 import pandas
-from math import pi, floor
+from math import pi, floor, inf
 from numpy_ringbuffer import RingBuffer		# pip install numpy_ringbuffer
 import random
 import copy
@@ -46,7 +46,7 @@ class agent:
 		self.t			= 0									# Age of agent in number of runStep calls
 		self.R_t 		= self.R_R							# Cumulative discounted return at time step t.
 		self.hist_a		= RingBuffer(capacity=self.t_p, dtype='U'+str(self.boundary))		# History of actions
-		self.hist_rho	= RingBuffer(capacity=self.t_p, dtype='U'+str(self.boundary))		# History of predictions
+		self.hist_rho	= RingBuffer(capacity=self.t_p, dtype='U'+str(self.boundary))		# History of predictions (needed?)
 		self.hist_e		= RingBuffer(capacity=self.t_p, dtype='U'+str(self.boundary))		# History of perceptions
 		self.hist_r		= RingBuffer(capacity=self.t_p)										# History of rewards
 
@@ -145,7 +145,45 @@ class agent:
 		dist_e_ij = len(e_i) - dist_e_ij
 		return dist_e_ij
 
-	def policyLegacy(self):
+	def policy(self):
+		a_t = self.A[0]
+		a_t_star = self.A[0]				# Optimal action for the agent determined by the policy at time step t	
+		c_est_star = math.inf
+
+		def futureCone(t_fc, past_a, past_e):
+			nonlocal a_t, a_t_star, c_est_star
+			if t_fc < self.t+self.t_f:
+				for a in self.A: 
+					past_a_new = copy.deepcopy(past_a)
+					past_a_new.append(a)
+					if t_fc == self.t:
+						a_t = a
+					for rho in self.E:
+						past_e_new = copy.deepcopy(past_e) 
+						past_e_new.append(rho)
+						futureCone(t_fc+1, past_a_new, past_e_new)
+			else:
+				# ELSE clause to be defined by PID004
+				'''
+				Weigh current action based on hist_{a,e} pairs using least_est
+					if multiplicity of any action is less that trail, do it
+					if all actions are in history with >= trail
+						for each action, find the c_est of filtered hist_e
+						choose action with highest physical complexity 
+				'''
+				data = ''.join(map(str, past_a))	# for testing integration
+				cost = self.c_est(np.array(list(data), dtype=int))
+				if (cost >= 0) and (cost < c_est_star):
+					c_est_star =  cost
+					a_t_star = a_t
+				# ELSE clause to be defined by PID004
+
+		futureCone(self.t, list(self.hist_a), list(self.hist_e))
+		
+		return a_t_star
+
+		'''
+		# Legacy code from v10
 
 		basis = [0] * self.boundary			
 		reqdTrials = pow(3,self.boundary)
@@ -176,40 +214,16 @@ class agent:
 				basis[i] = int(pb[i])
 			print("Best basis : ",basis)
 		return basis
+		'''
 
-	def policy(self):
-		a_t = self.A[0]
-		a_t_star = self.A[0]				# Optimal action for the agent determined by the policy at time step t	
-		rho_t = self.E[0]
+	def predict(self, a_t_star):
 		rho_t_star = self.E[0]				# Prediction of the perception e_t made at time step t
-		c_est_star = 111110					# some large number
-
-		def futureCone(t_fc, past_a, past_rho):
-			nonlocal a_t, a_t_star, rho_t, rho_t_star, c_est_star
-			if t_fc < self.t+self.t_f:
-				for a in self.A: 			#[0:4]:		# for testing
-					past_a_new = copy.deepcopy(past_a)
-					past_a_new.append(a)
-					if t_fc == self.t:
-						a_t = a
-					for rho in self.E:		#[0:4]: 	# for testing
-						if t_fc == self.t:
-							rho_t = rho
-						past_rho_new = copy.deepcopy(past_rho) 
-						past_rho_new.append(rho)
-						futureCone(t_fc+1, past_a_new, past_rho_new)
-			else:
-				data = ''.join(map(str, past_rho))	# currently only rho considered
-				cost = self.c_est(np.array(list(data), dtype=int))
-				# print("Past_a :",list(past_a),"Past_rho :",list(past_rho),"c_est :",cost)
-				if (cost >= 0) and (cost < c_est_star):
-						c_est_star =  cost
-						a_t_star = a_t
-						rho_t_star = rho_t
-
-		futureCone(self.t, list(self.hist_a), list(self.hist_rho))
-		
-		return [a_t_star, rho_t_star]
+		'''
+		Use hist_{a,e} to predict rho_t_star from a_t_star
+			if multiplicity of a_t_star is less that trail, return random rho_t_star
+			else return rho_t_star based on probability of hist_e for a_t_star
+		'''
+		return rho_t_star
 
 	def calcReturn(self, hist_r):
 		R_t = 0
@@ -229,16 +243,16 @@ class agent:
 
 	def run(self):
 		while (self.t < self.lifespan):
-			if (self.R_t < self.R_D):	# Halt agent (die)
+			if (self.R_t < self.R_D):			# Halt agent (die)
 				print("The input and program conspired against my eternal life")
-				return
+				return	
 			self.t_p_max = self.t if (self.t-self.t_p) < 0 else self.t_p	 # How much historic data is available (adjusted for initial few steps)
 
-			[a_t_star, rho_t_star] = self.policy()
-			
+			a_t_star = self.policy()
 			self.hist_a.append(a_t_star)
 			self.act(a_t_star)
 
+			rho_t_star = self.predict(a_t_star)
 			self.hist_rho.append(rho_t_star)
 
 			e_t = self.perceive()				# Perception recorded by the agent at time step t.
@@ -251,7 +265,7 @@ class agent:
 
 			print("Age =",self.t,"\t--> Action :",a_t_star,"Prediction :",rho_t_star,"Perception :",e_t,"Reward :",r_t,"Return :",self.R_t)
 
-			if (self.R_t < self.R_R):	# Reproduce
+			if (self.R_t < self.R_R):			# Reproduce
 				genes_new = self.mutate(genes)
 				self.constructor(genes_new)
 			self.t += 1
