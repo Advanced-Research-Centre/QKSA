@@ -4,6 +4,8 @@ Latest pre-release : v09 [![DOI](https://zenodo.org/badge/342195575.svg)](https:
 
 Artificial-Life + General-Reinforcement-Learning + Digital-Physics
 
+[![Project pitch](https://img.youtube.com/vi/RPHbsUFjZcI/0.jpg)](https://www.youtube.com/watch?v=RPHbsUFjZcI)
+
 ### Suggestive titles
 * ALife path to AGI, by combining MC-AIXI-tl with Universal Constructor in Python
 * Automated Design and Inference of Quantum Foundations Experiments on the Circuit Model using a Swarm of Evolving General Reinforcement Learning Agents
