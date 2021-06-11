@@ -3,6 +3,7 @@
 '''
 
 import numpy as np
+import qiskit.quantum_info as qi
 from qiskit import QuantumCircuit, qasm, Aer, execute
 
 def vec(rho):
@@ -20,7 +21,7 @@ def QProcess():
     ensemble = 2
     qproc = []
     for i in range(0,ensemble):
-        qproc.append([QuantumCircuit(2, 2),0])
+        qproc.append([QuantumCircuit(2, 1),0])
     qproc[0][1] = 0.5
     qproc[0][0].h(0)
     qproc[0][0].h(1)
@@ -33,6 +34,7 @@ E = QProcess()
 for i in E:
     print("Probability: ",i[1])
     print(i[0])
-
+    print(qi.Choi(i[0]))
+    print(qi.Kraus(i[0]))
 
 
