@@ -43,7 +43,7 @@ def estKC_pyBDM(size, S1, S2):
         print(i,"\t",aprxKC.bdm(S1[0:2**i]),"\t",aprxKC.bdm(S2[0:2**i]))
 
 # https://en.wikipedia.org/wiki/Deflate
-def estKC_npDeflate(size, S1, S2):
+def estKC_pyflate(size, S1, S2):
     print("\n--- KC estimation using pyflate ---\n")
     for i in range(size[0],size[-1]+1):        
         np.savez_compressed("tempfiles\S1c_"+str(i), S1[0:2**i])
