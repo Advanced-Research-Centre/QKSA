@@ -1,4 +1,4 @@
-# AutonomousQuantumPhysicist
+# Quantum Knowledge Seeking Agent
 
 Latest pre-release : v09 [![DOI](https://zenodo.org/badge/342195575.svg)](https://zenodo.org/badge/latestdoi/342195575)
 
