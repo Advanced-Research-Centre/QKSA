@@ -1,5 +1,5 @@
 '''
- Code for Harshitta's project (Week 1)
+Comparison between raw, pyBDM, pyflate for binary Fibonacci series
 '''
 
 import numpy as np

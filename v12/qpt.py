@@ -1,53 +1,136 @@
-'''
-Quantum Process Tomography
-'''
+"""
+Ancilla Assisted Quantum Process Tomography on n-qubits
+Construct Choi density matrix of process from tomographic trials
+"""
 
-# Reference: https://qiskit.org/documentation/tutorials/noise/8_tomography.html#1-qubit-process-tomography-example
-
-import qiskit
 import qiskit.quantum_info as qi
-from qiskit import QuantumRegister, QuantumCircuit, ClassicalRegister, Aer
-from qiskit.ignis.verification.tomography import process_tomography_circuits, ProcessTomographyFitter
+from qiskit import QuantumCircuit, Aer, execute
 
-q = QuantumRegister(1)
-circ = QuantumCircuit(q)
-circ.h(q[0])
+import numpy as np
+from math import pi
+from numpy.lib.shape_base import kron
+from copy import deepcopy
 
-# Get the ideal unitary operator
-a = qi.Choi(circ)
-print(a)
-print(a.is_unitary())
-print(a.to_operator())
-target_unitary = qi.Operator(circ)
-print(target_unitary)
+process_qubits = 1
+qubits = 2*process_qubits   # for AAQPT
+hsdim = 2**qubits           # Hilbert space dimension
+trials = 1024               # Number of tomographic trials for each observable
+aprx = 2                    # Places of decimal to round the reconstructed density matrix
 
-# Generate process tomography circuits and run on qasm simulator
-# Preparation in Pauli basis (alternate SIC basis is not scalable):
-#       "Z_p"   : |0⟩   : I
-#       "Z_m"   : |1⟩   : X
-#       "X_p"   : |+⟩   : H
-#       "Y_m"   : |i⟩   : H then S         (doubt: isn't that Y_p ?)
-# Measurement in:
-#       X               : H
-#       Y               : Sdag then H
-#       Z               : I
-# Total trails for n-qubits: 4^n * 3^n 
-# process_tomography_circuits(circuit, measured_qubits, prepared_qubits=None, meas_labels='Pauli', meas_basis='Pauli', prep_labels='Pauli', prep_basis='Pauli')
-qpt_circs = process_tomography_circuits(circ, q)
-# trials = len(qpt_circs)
-# for i in range(0, trials):
-#     print(qpt_circs[i].draw())
+'''
+Make entangled state
+'''
+def EntangleAncilla(qcirc):
+    qcirc.barrier()
+    qcirc.h(1)
+    qcirc.cx(1,0)
+    qcirc.barrier()
+    return
 
-job = qiskit.execute(qpt_circs, Aer.get_backend('qasm_simulator'), shots=40)
+'''
+The "black-box" quantum process is defined here
+'''
+def QProcess(qcirc):
+    qcirc.barrier()
+    qcirc.h(0)
+    qcirc.barrier()
+    return
 
-# Extract tomography data so that counts are indexed by measurement configuration
-qpt_tomo = ProcessTomographyFitter(job.result(), qpt_circs)
-data = qpt_tomo.data
-for i in data:
-    print(i, data[i])
+qcirc = QuantumCircuit(qubits, qubits)
+EntangleAncilla(qcirc)
+QProcess(qcirc)
+print(qcirc)
 
-# Tomographic reconstruction
-choi_fit_lstsq = qpt_tomo.fit(method='lstsq')
-print(choi_fit_lstsq.data)
+rho = qi.DensityMatrix.from_instruction(qcirc)
+print("\nActual Density Matrix")
+print(rho.data)
 
-# print('Average gate fidelity: F = {:.5f}'.format(qi.average_gate_fidelity(choi_fit_lstsq, target=target_unitary)))
+def PostRot(ps,qcirc):
+    P0 = [[1,0],[0,1]]
+    P1 = [[0,1],[1,0]]
+    P2 = [[0,complex(0,-1)],[complex(0,1),0]]
+    P3 = [[1,0],[0,-1]]
+    E0 = [1, 1]
+    E1 = [1, -1]
+    E2 = [1, -1]
+    E3 = [1, -1]
+    B = 1
+    E = 1
+    q = 0
+    for i in range(len(ps)-1,-1,-1):
+        if ps[i] == '0':        # I
+            B = kron(P0,B)
+            E = kron(E0,E)
+        elif ps[i] == '1':      # X
+            B = kron(P1,B)
+            E = kron(E1,E)
+            qcirc.ry(-pi/2,q)
+        elif ps[i] == '2':      # Y
+            B = kron(P2,B)
+            E = kron(E2,E)
+            qcirc.rx(pi/2,q)
+        elif ps[i] == '3':      # Z
+            B = kron(P3,B)
+            E = kron(E3,E)
+        q += 1
+    qcirc.barrier()
+    qcirc.measure([0,1], [0,1]) # make this scalable
+    return(B,E,qcirc)
+
+def toStr(n,base):
+   convertString = "0123456789ABCDEF"
+   if n < base:
+      return convertString[n]
+   else:
+      return toStr(n//base,base) + convertString[n%base]
+
+def dict2hist(counts):
+    phist = np.zeros(hsdim)
+    for i in range(0,hsdim):
+        if counts.get(str(bin(i)[2:]).zfill(qubits)) != None:
+            phist[i] = counts.get(str(bin(i)[2:]).zfill(qubits)) / trials
+    return phist
+
+fname = open("AAQPT_full.txt", "w")
+
+dm = np.zeros((hsdim, hsdim)) * 0j
+for i in range(0,4**qubits):
+    ps = toStr(i,4).zfill(qubits)
+    B,E,qcircB = PostRot(ps,deepcopy(qcirc))
+    job = execute(qcircB, Aer.get_backend('qasm_simulator'), shots=trials, memory=True)
+    result = job.result()
+    fname.write(str(result.get_memory())+"\n")
+    Si = sum(np.multiply(E, dict2hist(result.get_counts(qcircB))))
+    # print(np.trace(B.conj().T * rho.data))
+    dm += Si * B
+est_rho = dm/hsdim
+
+fname.close()
+
+print("\nEstimated Density Matrix")
+print(np.round(est_rho,aprx))
+
+"""
+
+(qeait) D:\GoogleDrive\RESEARCH\A1 - Programs\AutonomousQuantumPhysicist\v12>python qpt.py
+      ░      ┌───┐ ░  ░ ┌───┐ ░
+q_0: ─░──────┤ X ├─░──░─┤ H ├─░─
+      ░ ┌───┐└─┬─┘ ░  ░ └───┘ ░
+q_1: ─░─┤ H ├──■───░──░───────░─
+      ░ └───┘      ░  ░       ░
+c: 2/═══════════════════════════
+
+
+Actual Density Matrix
+[[ 0.25+0.j  0.25+0.j  0.25+0.j -0.25+0.j]
+ [ 0.25+0.j  0.25+0.j  0.25+0.j -0.25+0.j]
+ [ 0.25+0.j  0.25+0.j  0.25+0.j -0.25+0.j]
+ [-0.25+0.j -0.25+0.j -0.25+0.j  0.25+0.j]]
+
+Estimated Density Matrix
+[[ 0.26+0.j    0.25+0.02j  0.25+0.02j -0.25-0.j  ]
+ [ 0.25-0.02j  0.25+0.j    0.25+0.01j -0.25+0.j  ]
+ [ 0.25-0.02j  0.25-0.01j  0.24+0.j   -0.25+0.01j]
+ [-0.25+0.j   -0.25-0.j   -0.25-0.01j  0.25+0.j  ]]
+
+"""
