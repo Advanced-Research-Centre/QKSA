@@ -91,24 +91,25 @@ def dict2hist(counts):
             phist[i] = counts.get(str(bin(i)[2:]).zfill(qubits)) / trials
     return phist
 
-fname = open("AAQPT_full.txt", "w")
-
-dm = np.zeros((hsdim, hsdim)) * 0j
-for i in range(0,4**qubits):
-    ps = toStr(i,4).zfill(qubits)
-    B,E,qcircB = PostRot(ps,deepcopy(qcirc))
-    job = execute(qcircB, Aer.get_backend('qasm_simulator'), shots=trials, memory=True)
-    result = job.result()
-    fname.write(str(result.get_memory())+"\n")
-    Si = sum(np.multiply(E, dict2hist(result.get_counts(qcircB))))
-    # print(np.trace(B.conj().T * rho.data))
-    dm += Si * B
-est_rho = dm/hsdim
-
-fname.close()
+def QST():
+    # fname = open("AAQPT_full.txt", "w")
+    dm = np.zeros((hsdim, hsdim)) * 0j
+    for i in range(0,4**qubits):
+        ps = toStr(i,4).zfill(qubits)
+        B,E,qcircB = PostRot(ps,deepcopy(qcirc))
+        job = execute(qcircB, Aer.get_backend('qasm_simulator'), shots=trials, memory=True)
+        result = job.result()
+        # fname.write(str(result.get_memory())+"\n")
+        Si = sum(np.multiply(E, dict2hist(result.get_counts(qcircB))))
+        # print(np.trace(B.conj().T * rho.data))
+        dm += Si * B
+    est_rho = dm/hsdim
+    # fname.close()
+    return est_rho
 
 print("\nEstimated Density Matrix")
-print(np.round(est_rho,aprx))
+rho_choi = np.round(QST(),aprx)
+print(rho_choi)
 
 """
 
@@ -134,3 +135,38 @@ Estimated Density Matrix
  [-0.25+0.j   -0.25-0.j   -0.25-0.01j  0.25+0.j  ]]
 
 """
+
+def partialTrace1(dm):
+    dm1 = np.zeros((2,2)) * 0j
+    for i in range(0,2):
+        for j in range(0,2):
+            dm1[i][j] = dm[i][j]+dm[i+2][j+2]
+    return dm1
+
+psi_inp = QuantumCircuit(process_qubits, process_qubits)
+psi_inp.i(0)
+rho_inp = qi.DensityMatrix.from_instruction(psi_inp).data
+
+print("\nInput State Preparation Circuit")
+print(psi_inp)
+print("\nInput Density Matrix")
+print(rho_inp)
+
+rho_anc = np.eye(2**process_qubits)
+
+# Use the quantum process to evolve the density matrix
+QProcess(psi_inp)
+rho_out = qi.DensityMatrix.from_instruction(psi_inp).data
+print("\nOutput Density Matrix")
+print(rho_out)
+
+# Evolution of a DensityMatrix ρ with respect to the Choi-matrix is given by: ρ-new = Tr1 [ Λ (ρT ⊗ I) ]
+
+# Use the original Choi matrix to predict the output density matrix 
+print(np.matmul(rho.data,np.kron(np.transpose(rho_inp),rho_anc)))           # NOT WORKING HERE
+rho_out_choi = partialTrace1(np.matmul(rho.data,np.kron(np.transpose(rho_inp),rho_anc)))
+print(rho_out_choi)
+
+# # Use the estimated Choi matrix to predict the output density matrix 
+# rho_est = 
+# print(rho_est)
