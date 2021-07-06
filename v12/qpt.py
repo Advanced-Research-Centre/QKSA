@@ -152,7 +152,7 @@ print(psi_inp)
 print("\nInput Density Matrix")
 print(rho_inp)
 
-rho_anc = np.eye(2**process_qubits)
+rho_anc = rho_inp # np.eye(2**process_qubits)
 
 # Use the quantum process to evolve the density matrix
 QProcess(psi_inp)
@@ -160,12 +160,31 @@ rho_out = qi.DensityMatrix.from_instruction(psi_inp).data
 print("\nOutput Density Matrix")
 print(rho_out)
 
+print("\nChoi Matrix")
+print(qi.Choi(psi_inp).data / 2**process_qubits)
+
 # Evolution of a DensityMatrix ρ with respect to the Choi-matrix is given by: ρ-new = Tr1 [ Λ (ρT ⊗ I) ]
 
 # Use the original Choi matrix to predict the output density matrix 
-print(np.matmul(rho.data,np.kron(np.transpose(rho_inp),rho_anc)))           # NOT WORKING HERE
-rho_out_choi = partialTrace1(np.matmul(rho.data,np.kron(np.transpose(rho_inp),rho_anc)))
-print(rho_out_choi)
+rho_sys = np.kron(np.transpose(rho_inp),rho_anc) 
+print(rho_sys)
+
+print("\nrho_sys_out options:")
+# rho_sys_out = np.matmul(rho.data,np.matmul(rho_sys,np.transpose(rho.data))) # NOT WORKING HERE... trace not 1
+# print(rho_sys_out)    
+rho_sys = np.kron(np.transpose(rho_inp),rho_anc) 
+rho_sys_out = np.matmul(rho.data,rho_sys)   # NOT WORKING HERE... trace not 1
+print(rho_sys_out)    
+rho_sys_out = np.matmul(rho_sys,rho.data)   # NOT WORKING HERE... trace not 1
+print(rho_sys_out)           
+rho_sys = np.kron(rho_anc,np.transpose(rho_inp)) 
+rho_sys_out = np.matmul(rho.data,rho_sys)   # NOT WORKING HERE... trace not 1
+print(rho_sys_out)    
+rho_sys_out = np.matmul(rho_sys,rho.data)   # NOT WORKING HERE... trace not 1
+print(rho_sys_out)           
+
+# rho_out_choi = partialTrace1(rho_sys_out)
+# print(rho_out_choi)
 
 # # Use the estimated Choi matrix to predict the output density matrix 
 # rho_est = 
