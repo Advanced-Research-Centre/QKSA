@@ -62,7 +62,7 @@ class environment:
 
 	def measure(self, neighbours):
 		
-		circ = QuantumCircuit.from_qasm_file(self.OpenQASM)
+		circ = QuantumCircuit.from_qasm_file(self.qprocess)
 		if (not self.allZ):
 			if len(self.basis) == len(neighbours):
 				for n in neighbours:
