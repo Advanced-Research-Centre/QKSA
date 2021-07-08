@@ -4,7 +4,7 @@ Latest pre-release : v09 [![DOI](https://zenodo.org/badge/342195575.svg)](https:
 
 Artificial-Life + General-Reinforcement-Learning + Digital-Physics
 
-[Recent pre-print with motivation, core thesis and baseline framework](<./21-07-05 - QKSA.pdf>)
+Recent pre-print with motivation, core thesis and baseline framework: [here](<./21-07-05 - QKSA.pdf>), [arXiv](https://arxiv.org/abs/2107.01429)
 
 [![Project pitch](https://img.youtube.com/vi/RPHbsUFjZcI/0.jpg)](https://www.youtube.com/watch?v=RPHbsUFjZcI)
 
