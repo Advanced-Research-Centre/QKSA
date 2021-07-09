@@ -6,8 +6,8 @@ env = environment()
 
 # Create Seed QKSA gene
 neighbours 	= list(range(0,env.num_qb))				# Qubit ids of neighbours (currently full environment is visible to every agent)
-c_gene		= "F0F0F0V0V1V2F0V3V4" 					# Initial Seed AI simple cost function
-wt_gene		= [1, 0, 0, 0, 0]						# Weight assigned to EAIT metrics in current LEAST c_function. Consider only program length for now
+c_gene		= "F0F0F0V0V1V2F0V3V4" 					# Initial Seed AI simple cost function. Addition of 5 LEAST estimates.
+wt_gene		= [1, 0, 0, 0, 0]						# Weight assigned to LEAST metrics in current c_function. Consider only program length for now
 l_max		= 120				
 e_max		= 0										# Currently not considered
 a_max		= 0										# Currently not considered

@@ -69,7 +69,8 @@ def PostRot(ps,qcirc):
             E = kron(E3,E)
         q += 1
     qcirc.barrier()
-    qcirc.measure([0,1], [0,1])                 # TBD: make this scalable
+    for q in range(0,len(ps)):
+        qcirc.measure(q, q)
     return(B,E,qcirc)
 
 '''

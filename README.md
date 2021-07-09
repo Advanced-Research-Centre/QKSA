@@ -8,6 +8,11 @@ Recent pre-print with motivation, core thesis and baseline framework: [here](<./
 
 [![Project pitch](https://img.youtube.com/vi/RPHbsUFjZcI/0.jpg)](https://www.youtube.com/watch?v=RPHbsUFjZcI)
 
+### How to run
+```
+python QKSA.py
+```
+
 ### Suggestive titles
 * ALife path to AGI, by combining MC-AIXI-tl with Universal Constructor in Python
 * Automated Design and Inference of Quantum Foundations Experiments on the Circuit Model using a Swarm of Evolving General Reinforcement Learning Agents

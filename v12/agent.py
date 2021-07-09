@@ -54,7 +54,7 @@ class agent:
 		print("Agent Alive and Ticking")
 			
 	def act(self, a_t_star):
-		self.env.setBasis(a_t_star)
+		self.env.setBasis(a_t_star) # check compatibility
 		return
 
 	def perceive(self):
@@ -273,6 +273,16 @@ class agent:
 		print("Lived life to the fullest")
 		return
 
+	'''
+	Convert a decimal number to base-n
+	'''
+	def toStr(self,n,base):
+		convertString = "0123456789ABCDEF"
+		if n < base:
+			return convertString[n]
+		else:
+			return self.toStr(n//base,base) + convertString[n%base]
+
 	def test(self):
 		# Codes for unit tests
 
@@ -290,6 +300,13 @@ class agent:
 		# self.hist_rho = np.random.randint(low=0, high=2, dtype=int, size=21)
 		# print(self.policy())
 
-		self.run()
+		# self.run()
+		print(self.env.qprocess)
+		qubits = self.env.num_qb
+		print(self.neighbours,len(self.neighbours))
+		for i in range(0,4**qubits):
+			# ps = list(reversed(list(self.toStr(i,4).zfill(qubits))))
+			pbasis = list(reversed(self.toStr(i,4).zfill(qubits)))
+			print(self.env.measure(self.neighbours,pbasis))
 
 		return

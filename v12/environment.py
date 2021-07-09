@@ -55,27 +55,23 @@ class environment:
 		self.num_qb = num_qb
 		return
 
-	def setBasis(self, basis):
-
-		self.basis = basis
-		self.allZ = False
-
-	def measure(self, neighbours):
+	def measure(self, neighbours, basis):
 		
 		circ = QuantumCircuit.from_qasm_file(self.qprocess)
-		if (not self.allZ):
-			if len(self.basis) == len(neighbours):
-				for n in neighbours:
-					if self.basis[n] == 1:
-						# circ.ry(pi/2,n) # for measuring along -X
-						circ.ry(-pi/2,n) # for measuring along X
-					elif self.basis[n] == 2:
-						circ.rx(pi/2,n) # for measuring along Y	
-			else:
-				print("Error: Not all measurement basis defined by agent. Default All-Z basis is selected.")
+
+		if len(neighbours) != len(basis):
+			print("Error: Not all measurement basis defined by agent. Default All-Z basis is selected.")
+		else:
+			for i in range(0,len(basis)):
+				if basis[i] == '1':
+					circ.ry(-pi/2,neighbours[i]) 	# for measuring along X
+				elif basis[i] == '2':
+					circ.rx(pi/2,neighbours[i]) 	# for measuring along Y
+			
 		for n in neighbours:
 			circ.measure(n,n)
 		# print(circ.draw())
+		
 		result = execute(circ, self.simulator, shots=1, memory=True).result()
-		memory = result.get_memory(circ)
+		memory = result.get_memory()
 		return memory 
