@@ -6,6 +6,8 @@ from numpy_ringbuffer import RingBuffer		# pip install numpy_ringbuffer
 import random
 import copy
 
+from qpt import qpt
+
 class agent:
 				
 	pi_t = 0		# policy for choosing an optimal action and maximizing return at time step t.
@@ -46,9 +48,9 @@ class agent:
 
 		self.t			= 0									# Age of agent in number of runStep calls
 		self.R_t 		= self.R_R							# Cumulative discounted return at time step t.
-		self.hist_a		= RingBuffer(capacity=self.t_p, dtype='U'+str(self.boundary))		# History of actions
+		self.hist_a		= RingBuffer(capacity=self.t_p, dtype='object')						# History of actions
 		self.hist_rho	= RingBuffer(capacity=self.t_p, dtype='U'+str(self.boundary))		# History of predictions (needed?)
-		self.hist_e		= RingBuffer(capacity=self.t_p, dtype='U'+str(self.boundary))		# History of perceptions
+		self.hist_e		= RingBuffer(capacity=self.t_p, dtype='object')						# History of perceptions
 		self.hist_r		= RingBuffer(capacity=self.t_p)										# History of rewards
 
 		print("Agent Alive and Ticking")
@@ -146,6 +148,15 @@ class agent:
 		dist_e_ij = len(e_i) - dist_e_ij
 		return dist_e_ij
 
+	def DeltaDM(self, dm_i, dm_j):
+		# Distance function between elements in percept space
+		dist_dm_ij = 0
+		# https://en.wikipedia.org/wiki/Trace_distance
+		return dist_dm_ij
+
+	'''
+	Given the history, choose an action for the current step that would have the highest utility
+	'''
 	def policy(self):
 		a_t = self.A[0]
 		a_t_star = self.A[0]				# Optimal action for the agent determined by the policy at time step t	
@@ -217,6 +228,16 @@ class agent:
 		return basis
 		'''
 
+	'''
+	Partial trace of the lower significant subsystem of 2 qubits
+	'''
+	def partialTrace1(self, dm):
+		dm1 = np.zeros((2,2)) * 0j
+		for i in range(0,2):
+			for j in range(0,2):
+				dm1[i][j] = dm[i][j]+dm[i+2][j+2]
+		return dm1
+
 	def predict(self, a_t_star):
 		rho_t_star = self.E[0]				# Prediction of the perception e_t made at time step t
 		'''
@@ -224,6 +245,18 @@ class agent:
 			if multiplicity of a_t_star is less that trail, return random rho_t_star
 			else return rho_t_star based on probability of hist_e for a_t_star
 		'''
+
+		# for QPT, a_t_star comprises of a input density matrix and a measurement basis.
+		# the rho_t_star is the output density matrix based on the current model
+
+		rho_inp = a_t_star[0]
+		process_qubits = 1					# TBD: Generalize to n-qubits
+
+		# Use the estimated Choi matrix to predict the output density matrix 
+		rho_out_choi_est = 2**process_qubits * self.partialTrace1( np.matmul( np.kron(np.transpose(rho_inp), np.eye(2**process_qubits) ), rho_choi ))
+		print("\nOutput Density Matrix using Estimated Choi Matrix")
+		print(rho_out_choi_est)
+
 		return rho_t_star
 
 	def calcReturn(self, hist_r):
@@ -283,6 +316,20 @@ class agent:
 		else:
 			return self.toStr(n//base,base) + convertString[n%base]
 
+	def loadHist(self, fname):
+
+		fobj = open(fname, "r")
+		for i in range(0,4**2):
+			ps = self.toStr(i,4).zfill(2)
+			res = fobj.readline()
+			i = 2
+			while (i < len(res)):
+				self.hist_a.append(["E",ps])
+				self.hist_e.append(res[i:i+2])
+				i += 6
+		fobj.close()
+
+
 	def test(self):
 		# Codes for unit tests
 
@@ -301,11 +348,48 @@ class agent:
 		# print(self.policy())
 
 		# self.run()
+
+
+
+		p_qpt = qpt (self.env.num_qb)
+		rho_choi_old = p_qpt.est_choi(self.hist_a, self.hist_e)
+		print("Initial estimated environment:\n",rho_choi_old)
+		
+		# Given hist_a[rho_in, M] and hist_e[bitstr] for every timestep 0:t-1
+
+		# Select QPT algos that are within c_bound
+
+		# Pass hist_ae to each QPT algo
+
+		# Each QPT returns:
+
+		# (1) least cost estimate 
+
+		# (2) estimated rho_choi
+
+		self.loadHist("results/AAQPT_full.txt")
+		rho_choi = p_qpt.est_choi(self.hist_a, self.hist_e)
+		print("Boosted estimated environment:\n",rho_choi)
+
+		# (3) action for timestep t
+		a_t = p_qpt.policy()
+		print("Chosen action:", a_t)
+
+		# Calculate distance between rho_choi and predicted rho_choi_old
+		# This is the reward/utility (knowledge gain), thus, higher the knowledge gain (error in prediction) the better
+		# When knowledge gain falls below a limit, learning is finished and QKSA reproduces with mutated cost fn.
+		kg = self.DeltaDM(rho_choi_old,rho_choi)
+		print(kg)
+
+		# Use a_t and rho_choi to predict e_t
+		
+		# Use current history and a_t and predicted e_t to make predicted rho_choi for next step
+
+		# Get actual e_t by running the env.
 		print(self.env.qprocess)
 		qubits = self.env.num_qb
 		print(self.neighbours,len(self.neighbours))
 		for i in range(0,4**qubits):
-			# ps = list(reversed(list(self.toStr(i,4).zfill(qubits))))
 			pbasis = list(reversed(self.toStr(i,4).zfill(qubits)))
 			print(self.env.measure(self.neighbours,pbasis))
 
