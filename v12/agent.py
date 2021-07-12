@@ -92,7 +92,7 @@ class agent:
 		# Function to estimate the run-time
 		t_est = 0
 		if len(data) < 13:	# LUT only till length 12, TBD: Sliding window Logical Depth
-			ld_db = pandas.read_csv('logicalDepthsBinaryStrings.csv',names=['BinaryString', 'LogicalDepth'],dtype={'BinaryString': object,'LogicalDepth': int}) # https://github.com/algorithmicnaturelab/OACC/blob/master/data/logicalDepthsBinaryStrings.csv
+			ld_db = pandas.read_csv('data/logicalDepthsBinaryStrings.csv',names=['BinaryString', 'LogicalDepth'],dtype={'BinaryString': object,'LogicalDepth': int}) # https://github.com/algorithmicnaturelab/OACC/blob/master/data/logicalDepthsBinaryStrings.csv
 			data_str = ""
 			for b in data: data_str = data_str+str(b)
 			t_est = ld_db[ld_db['BinaryString'].dropna().str.fullmatch(data_str)]['LogicalDepth'].values[0]
@@ -148,10 +148,13 @@ class agent:
 		dist_e_ij = len(e_i) - dist_e_ij
 		return dist_e_ij
 
+	'''
+	Trace distance between two density matrices
+	https://en.wikipedia.org/wiki/Trace_distance
+	'''
 	def DeltaDM(self, dm_i, dm_j):
 		# Distance function between elements in percept space
-		dist_dm_ij = 0
-		# https://en.wikipedia.org/wiki/Trace_distance
+		dist_dm_ij = np.real(np.trace(np.sqrt(np.matmul((dm_i - dm_j).conjugate().transpose(),dm_i - dm_j))) / 2)
 		return dist_dm_ij
 
 	'''
@@ -352,8 +355,8 @@ class agent:
 
 
 		p_qpt = qpt (self.env.num_qb)
-		rho_choi_old = p_qpt.est_choi(self.hist_a, self.hist_e)
-		print("Initial estimated environment:\n",rho_choi_old)
+		rho_choi_pred = p_qpt.est_choi(self.hist_a, self.hist_e)
+		print("Initial estimated environment:\n",rho_choi_pred)
 		
 		# Given hist_a[rho_in, M] and hist_e[bitstr] for every timestep 0:t-1
 
@@ -367,7 +370,7 @@ class agent:
 
 		# (2) estimated rho_choi
 
-		self.loadHist("results/AAQPT_full.txt")
+		self.loadHist("data/AAQPT_full.txt")
 		rho_choi = p_qpt.est_choi(self.hist_a, self.hist_e)
 		print("Boosted estimated environment:\n",rho_choi)
 
@@ -378,19 +381,23 @@ class agent:
 		# Calculate distance between rho_choi and predicted rho_choi_old
 		# This is the reward/utility (knowledge gain), thus, higher the knowledge gain (error in prediction) the better
 		# When knowledge gain falls below a limit, learning is finished and QKSA reproduces with mutated cost fn.
-		kg = self.DeltaDM(rho_choi_old,rho_choi)
-		print(kg)
+		# kg = self.DeltaDM(rho_choi,rho_choi)
+		kg = self.DeltaDM(rho_choi_pred,rho_choi)
+		print("Reward/Utility:",kg)
 
 		# Use a_t and rho_choi to predict e_t
-		
+				
 		# Use current history and a_t and predicted e_t to make predicted rho_choi for next step
+		rho_choi_pred = rho_choi
 
 		# Get actual e_t by running the env.
-		print(self.env.qprocess)
-		qubits = self.env.num_qb
-		print(self.neighbours,len(self.neighbours))
-		for i in range(0,4**qubits):
-			pbasis = list(reversed(self.toStr(i,4).zfill(qubits)))
-			print(self.env.measure(self.neighbours,pbasis))
+		e_t = self.env.measure(self.neighbours,list(reversed(a_t[1])))
+		print("Perception from environment:",e_t)
+		# print(self.env.qprocess)
+		# qubits = self.env.num_qb
+		# print(self.neighbours,len(self.neighbours))
+		# for i in range(0,4**qubits):
+		# 	pbasis = list(reversed(self.toStr(i,4).zfill(qubits)))
+		# 	print(self.env.measure(self.neighbours,pbasis))
 
 		return
