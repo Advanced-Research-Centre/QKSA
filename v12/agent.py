@@ -5,8 +5,10 @@ from math import pi, floor, inf
 from numpy_ringbuffer import RingBuffer		# pip install numpy_ringbuffer
 import random
 import copy
-
+from qiskit import QuantumCircuit, qasm, Aer, execute
+from qiskit import *
 from qpt import qpt
+from environment import environment
 
 class agent:
 				
@@ -332,29 +334,35 @@ class agent:
 				i += 6
 		fobj.close()
 
-
 	def test(self):
+
 		# Codes for unit tests
+		'''
+		print(self.genes)
+		print(self.neighbours)
+		print(self.A)
+		print(self.E)
+		print((self.E[0],self.E[5]),self.Delta(self.E[0],self.E[5]))
 
-		# print(self.genes)
-		# print(self.neighbours)
-		# print(self.A)
-		# print(self.E)
-		# print((self.E[0],self.E[5]),self.Delta(self.E[0],self.E[5]))
+		data = np.random.randint(low=0, high=2, dtype=int, size=21)
+		print(self.L_est(data))
+		print(self.c_est(data))
 
-		# data = np.random.randint(low=0, high=2, dtype=int, size=21)
-		# print(self.L_est(data))
-		# print(self.c_est(data))
-
-		# self.t_f = 2
-		# self.hist_rho = np.random.randint(low=0, high=2, dtype=int, size=21)
-		# print(self.policy())
+		self.t_f = 2
+		self.hist_rho = np.random.randint(low=0, high=2, dtype=int, size=21)
+		print(self.policy())
+		'''
 
 		# self.run()
 
+		# Codes for v12 QPT tests
 
-
-		p_qpt = qpt (self.env.num_qb)
+		# Create Quantum Process Tomography Object and Environment
+		p_qpt = qpt(self.env.num_qb)
+		qptCirc = p_qpt.aaqpt(self.env.qpCirc)
+		env_qpt = environment(p_qpt.num_qb)
+		env_qpt.createEnv(qptCirc)
+		
 		rho_choi_pred = p_qpt.est_choi(self.hist_a, self.hist_e)
 		print("Initial estimated environment:\n",rho_choi_pred)
 		
@@ -381,7 +389,6 @@ class agent:
 		# Calculate distance between rho_choi and predicted rho_choi_old
 		# This is the reward/utility (knowledge gain), thus, higher the knowledge gain (error in prediction) the better
 		# When knowledge gain falls below a limit, learning is finished and QKSA reproduces with mutated cost fn.
-		# kg = self.DeltaDM(rho_choi,rho_choi)
 		kg = self.DeltaDM(rho_choi_pred,rho_choi)
 		print("Reward/Utility:",kg)
 
@@ -390,14 +397,8 @@ class agent:
 		# Use current history and a_t and predicted e_t to make predicted rho_choi for next step
 		rho_choi_pred = rho_choi
 
-		# Get actual e_t by running the env.
-		e_t = self.env.measure(self.neighbours,list(reversed(a_t[1])))
+		# Get actual e_t by running the QPT env.
+		e_t = env_qpt.measure(list(range(0,p_qpt.num_qb)),list(reversed(a_t[1])))
 		print("Perception from environment:",e_t)
-		# print(self.env.qprocess)
-		# qubits = self.env.num_qb
-		# print(self.neighbours,len(self.neighbours))
-		# for i in range(0,4**qubits):
-		# 	pbasis = list(reversed(self.toStr(i,4).zfill(qubits)))
-		# 	print(self.env.measure(self.neighbours,pbasis))
 
 		return

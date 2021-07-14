@@ -2,10 +2,12 @@ from environment import environment
 from agent import agent
 
 # Create Quantum Process Environment
-env = environment()
+num_qb = int(input("Number of qubits : ") or "1")
+env = environment(num_qb)
+env.createEnv()
 
 # Create Seed QKSA gene
-neighbours 	= list(range(0,env.num_qb))				# Qubit ids of neighbours (currently full environment is visible to every agent)
+neighbours 	= list(range(0,num_qb))				    # Qubit ids of neighbours (currently full environment is visible to every agent)
 c_gene		= "F0F0F0V0V1V2F0V3V4" 					# Initial Seed AI simple cost function. Addition of 5 LEAST estimates.
 wt_gene		= [1, 0, 0, 0, 0]						# Weight assigned to LEAST metrics in current c_function. Consider only program length for now
 l_max		= 120				

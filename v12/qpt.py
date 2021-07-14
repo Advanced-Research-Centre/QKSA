@@ -7,13 +7,31 @@ import numpy as np
 from numpy.lib.function_base import append	
 from numpy.lib.shape_base import kron
 import random
+from qiskit import QuantumCircuit
 
 class qpt:
 
-    def __init__(self, num_qb):
+    def __init__(self, num_qb_qp):
 
-        self.num_qb     = num_qb        # Number of qubits
-        self.hsdim      = 2**num_qb
+        self.num_qb     = num_qb_qp*2                # Number of qubits required for process tomography
+        self.hsdim      = 2**self.num_qb
+
+    def EntangleAncilla(self, qcirc):
+        qp_qb = int(self.num_qb / 2)
+        qcirc.barrier()
+        for i in range(0,qp_qb):
+            qcirc.h(qp_qb+i)
+            qcirc.cx(qp_qb+i,i)
+        qcirc.barrier()
+        return
+
+    def aaqpt(self, qpCirc):
+        qptCirc = QuantumCircuit(self.num_qb, self.num_qb)
+        self.EntangleAncilla(qptCirc)
+        qp_gate = qpCirc.to_gate(label='QP')
+        qptCirc.append(qp_gate,list(range(0,int(self.num_qb/2))))
+        qptCirc.barrier()
+        return qptCirc
 
     def ae_dict(self):
 
