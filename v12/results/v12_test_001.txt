@@ -1,0 +1,58 @@
+(qeait) D:\GoogleDrive\RESEARCH\A1 - Programs\QKSA\v12>python QKSA.py
+Number of qubits : 1
+
+. . . environment being setup . . .
+
+1: All-Zeros
+2: Equal Superposition
+3: Random Pauli
+4: GHZ-state
+5: W-state
+
+Choose Environment State : 2
+Equal Superposition state on 1 qubits selected
+     ┌───┐
+q_0: ┤ H ├
+     └───┘
+
+. . . environment setup complete . . .
+
+Agent Alive and Ticking
+
+. . . environment being setup . . .
+
+      ░      ┌───┐ ░ ┌────┐ ░
+q_0: ─░──────┤ X ├─░─┤ QP ├─░─
+      ░ ┌───┐└─┬─┘ ░ └────┘ ░
+q_1: ─░─┤ H ├──■───░────────░─
+      ░ └───┘      ░        ░
+c: 2/═════════════════════════
+
+
+. . . environment setup complete . . .
+
+Initial estimated environment:
+ [[0.25+0.j 0.  +0.j 0.  +0.j 0.  +0.j]
+ [0.  +0.j 0.25+0.j 0.  +0.j 0.  +0.j]
+ [0.  +0.j 0.  +0.j 0.25+0.j 0.  +0.j]
+ [0.  +0.j 0.  +0.j 0.  +0.j 0.25+0.j]]
+Boosted estimated environment:
+ [[ 0.24169922+0.j          0.25097656-0.00146484j  0.23925781-0.00439453j
+  -0.23974609+0.00732422j]
+ [ 0.25097656+0.00146484j  0.26123047+0.j          0.26025391-0.01611328j
+  -0.26074219-0.00537109j]
+ [ 0.23925781+0.00439453j  0.26025391+0.01611328j  0.23095703+0.j
+  -0.24902344-0.00830078j]
+ [-0.23974609-0.00732422j -0.26074219+0.00537109j -0.24902344+0.00830078j
+   0.26611328+0.j        ]]
+Chosen action: ['E', '31']
+Reward/Utility: 0.8673336117409827
+
+      ░      ┌───┐ ░ ┌────┐ ░ ┌───────────┐ ░ ┌─┐    ░
+q_0: ─░──────┤ X ├─░─┤ QP ├─░─┤ RY(-pi/2) ├─░─┤M├────░─
+      ░ ┌───┐└─┬─┘ ░ └────┘ ░ └───────────┘ ░ └╥┘┌─┐ ░
+q_1: ─░─┤ H ├──■───░────────░───────────────░──╫─┤M├─░─
+      ░ └───┘      ░        ░               ░  ║ └╥┘ ░
+c: 2/══════════════════════════════════════════╩══╩════
+                                               0  1
+Perception from environment: ['00']

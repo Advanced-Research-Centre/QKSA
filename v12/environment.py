@@ -71,9 +71,11 @@ class environment:
 					circ.ry(-pi/2,neighbours[i]) 	# for measuring along X
 				elif basis[i] == '2':
 					circ.rx(pi/2,neighbours[i]) 	# for measuring along Y
-			
+
+		circ.barrier()	
 		for n in neighbours:
 			circ.measure(n,n)
+		circ.barrier()	
 		print(circ.draw())
 		
 		result = execute(circ, self.simulator, shots=1, memory=True).result()
