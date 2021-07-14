@@ -76,7 +76,7 @@ class environment:
 		for n in neighbours:
 			circ.measure(n,n)
 		circ.barrier()	
-		print(circ.draw())
+		# print(circ.draw())
 		
 		result = execute(circ, self.simulator, shots=1, memory=True).result()
 		memory = result.get_memory()

@@ -122,37 +122,6 @@ class qpt:
 
 
 # import qiskit.quantum_info as qi
-# from qiskit import QuantumCircuit, Aer, execute
-
-# from math import pi
-# from copy import deepcopy
-
-# process_qubits = 1
-# qubits = 2*process_qubits   # for AAQPT
-# hsdim = 2**qubits           # Hilbert space dimension
-# trials = 1024               # Number of tomographic trials for each observable
-# aprx = 2                    # Places of decimal to round the reconstructed density matrix
-
-
-# '''
-# The "black-box" quantum process is defined here
-# '''
-# def QProcess(qcirc, qreg):
-#     qcirc.barrier()
-#     qcirc.h(qreg[0])
-#     qcirc.barrier()
-#     return
-
-# '''
-# Make entangled state
-# '''
-# def EntangleAncilla(qcirc):
-#     qcirc.barrier()
-#     qcirc.h(1)
-#     qcirc.cx(1,0)
-#     qcirc.barrier()
-#     return
-
 # qcirc = QuantumCircuit(qubits, qubits)
 # EntangleAncilla(qcirc)
 # QProcess(qcirc, [0])

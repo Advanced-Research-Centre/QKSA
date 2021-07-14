@@ -24,7 +24,7 @@ t_f			= 1										# Number of time steps the agent predicts in the future. Sing
 gamma		= 0.05									# Reward discount that is proportional to the time span between the reward step and the current time step. Linear function
 R_D			= 0										# Reward threshold for death. If R_t < R_D the agent halts (dies).
 R_R			= 0										# Reward threshold for reproduction. If R_D < R_t < R_R, the agent self-replicates with mutation in genes
-lifespan	= 3										# Max age of agent before death
+lifespan	= 1										# Max age of agent before death
 genes = [neighbours, c_gene, wt_gene, l_max, e_max, a_max, s_max, t_max, m_c, m, n, s_c, t_p, t_f, gamma, R_D, R_R, lifespan]
 
 # Create Seed QKSA

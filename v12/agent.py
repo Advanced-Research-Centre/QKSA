@@ -9,6 +9,8 @@ from qiskit import QuantumCircuit, qasm, Aer, execute
 from qiskit import *
 from qpt import qpt
 from environment import environment
+import qiskit.quantum_info as qi
+import matplotlib.pyplot as plt
 
 class agent:
 				
@@ -363,42 +365,79 @@ class agent:
 		env_qpt = environment(p_qpt.num_qb)
 		env_qpt.createEnv(qptCirc)
 		
+		# Boost learning (optional)
+		# self.loadHist("data/AAQPT_full.txt")						
+
 		rho_choi_pred = p_qpt.est_choi(self.hist_a, self.hist_e)
 		print("Initial estimated environment:\n",rho_choi_pred)
 		
 		# Given hist_a[rho_in, M] and hist_e[bitstr] for every timestep 0:t-1
-
 		# Select QPT algos that are within c_bound
-
 		# Pass hist_ae to each QPT algo
-
 		# Each QPT returns:
-
 		# (1) least cost estimate 
-
 		# (2) estimated rho_choi
-
-		self.loadHist("data/AAQPT_full.txt")
-		rho_choi = p_qpt.est_choi(self.hist_a, self.hist_e)
-		print("Boosted estimated environment:\n",rho_choi)
-
 		# (3) action for timestep t
-		a_t = p_qpt.policy()
-		print("Chosen action:", a_t)
-
-		# Calculate distance between rho_choi and predicted rho_choi_old
-		# This is the reward/utility (knowledge gain), thus, higher the knowledge gain (error in prediction) the better
-		# When knowledge gain falls below a limit, learning is finished and QKSA reproduces with mutated cost fn.
-		kg = self.DeltaDM(rho_choi_pred,rho_choi)
-		print("Reward/Utility:",kg)
-
 		# Use a_t and rho_choi to predict e_t
-				
 		# Use current history and a_t and predicted e_t to make predicted rho_choi for next step
-		rho_choi_pred = rho_choi
-
 		# Get actual e_t by running the QPT env.
-		e_t = env_qpt.measure(list(range(0,p_qpt.num_qb)),list(reversed(a_t[1])))
-		print("Perception from environment:",e_t)
+		# Calculate distance between rho_choi and predicted rho_choi_old as the knowledge gain
+		
+		knowledge = []
+
+		for step in range(0,2000):
+			rho_choi = p_qpt.est_choi(self.hist_a, self.hist_e)
+			# print("Current estimated environment:\n",rho_choi)
+
+			a_t = p_qpt.policy()
+			# print("Chosen action:", a_t)
+			self.hist_a.append(a_t)
+
+			pr_qcirc = QuantumCircuit(p_qpt.num_qb)
+			prb = list(reversed(a_t[1]))
+			for i in range(0,len(prb)):
+				if prb[i] == '1':
+					pr_qcirc.ry(-pi/2,i) 	# for measuring along X
+				elif prb[i] == '2':
+					pr_qcirc.rx(pi/2,i) 	# for measuring along Y
+			prU = qi.Operator(pr_qcirc)		# post-rotation unitary
+			pr_rho_choi = np.matmul(prU.data,  np.matmul(rho_choi, prU.conjugate().transpose().data) )
+			dist_pred = np.diag(np.real(pr_rho_choi))
+			pred_rv = random.uniform(0, sum(dist_pred))
+			j = 0
+			for i in range(0,len(dist_pred)):
+				j += dist_pred[i]
+				if j > pred_rv:
+					break
+			rho_t = self.toStr(i,2).zfill(p_qpt.num_qb)
+			# print("Perception based on rho_choi and a_t:",rho_t)
+							
+			hist_e_rho = copy.deepcopy(self.hist_e)
+			hist_e_rho.append(rho_t)
+			rho_choi_pred = p_qpt.est_choi(self.hist_a, hist_e_rho)
+
+			e_t = env_qpt.measure(list(range(0,p_qpt.num_qb)),list(reversed(a_t[1])))
+			# print("Perception from environment:",e_t[0])
+			self.hist_e.append(e_t[0])
+
+			# This is the reward/utility (knowledge gain), thus, higher the knowledge gain (error in prediction) the better
+			# When knowledge gain falls below a limit, learning is finished and QKSA reproduces with mutated cost fn.
+			kg = self.DeltaDM(rho_choi_pred,rho_choi)
+			# print("Reward/Utility:",kg)
+			knowledge.append(kg)
+
+		rho_choi = p_qpt.est_choi(self.hist_a, self.hist_e)
+		print("Learnt environment:\n",rho_choi)
+
+		self.loadHist("data/AAQPT_full.txt")						
+		rho_choi_full = p_qpt.est_choi(self.hist_a, self.hist_e)
+		print("Target environment:\n",rho_choi_full)
+
+		kg = self.DeltaDM(rho_choi_full,rho_choi)
+		print("Remaining Knowledge Gap:",kg)
+
+		plt.plot(knowledge)
+		plt.ylabel('trace distance')
+		plt.show()
 
 		return
