@@ -34,9 +34,10 @@ python QKSA.py
 * v09: Per qubit 3 axis measure action. Basis selection policy based on BDM of percept history of tomographic basis.
 * v10: Integrate test environment with agent. Structured LEAST model and policy. Tested random Pauli environment for 2 and 3 qubits.
 * v11: Run, policy and prediction scheme structured. Full pseudo-code integrated in agent. 
+* v12: Ancilla-assisted quantum process tomography using QKSA based on random basis selection policy.
 
 ### In progress
-* v12: Smart process tomography based on LEAST metrics on action-perception history.
+* v13: LEAST metric on QPT and smart QPT based on action-perception history.
 
 ### Planned upgrades
 * Hidden and visible qubits. GHZ test with 2 visible qubits. ++++
