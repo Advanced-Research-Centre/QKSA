@@ -113,9 +113,26 @@ class qpt:
         return est_rho
 
     def policy(self):
+        return self.policyRB()
+        
+    def policyRB(self):
         mb = random.randint(0, 4**self.num_qb - 1)      # Entropy driven policies
         mbps = self.toStr(mb,4).zfill(self.num_qb)
         return ["E", mbps]
+
+    def policyBW(self):
+        ms = [4,2,4,4,2,4,4,2,4,4,2,4,4,2,4,4]
+        rv = random.randint(0, sum(ms))      
+        cs = 0
+        for i in range(0,len(ms)):
+            cs += ms[i]
+            if cs > rv:
+                break
+        mbps = self.toStr(i,4).zfill(self.num_qb)
+        return ["E", mbps]
+        
+        
+
     
     '''
 	# Legacy code from v10
