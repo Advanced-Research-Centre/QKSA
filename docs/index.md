@@ -1,37 +1,20 @@
-## Welcome to GitHub Pages
+# Quantum Knowledge Seeking Agent
 
-You can use the [editor on GitHub](https://github.com/Advanced-Research-Centre/QKSA/edit/main/docs/index.md) to maintain and preview the content for your website in Markdown files.
+Check out our recent [pre-print](https://arxiv.org/abs/2107.01429) with motivation, core thesis and baseline framework.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
-
-### Markdown
-
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
-
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
+### How to run
+from directory v13
+```
+python QKSA.py
 ```
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+### PyPi packages required
+* Qiskit
 
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/Advanced-Research-Centre/QKSA/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+### Important references
+* [AIXIjs](https://www.aslanides.io/aixijs/)
+* [Qiskit documentation](https://qiskit.org/documentation/)
+* [Build An Optimal Scientist, Then Retire](https://hplusmagazine.com/2010/01/05/build-optimal-scientist-then-retire/)
+* [The Online Algorithmic Complexity Calculator](http://complexitycalculator.com/)
+* [Law without law: from observer states to physics via algorithmic information theory](https://quantum-journal.org/papers/q-2020-07-20-301/)
+* [Estimating Algorithmic Information Using Quantum Computing for Genomics Applications](https://www.mdpi.com/2076-3417/11/6/2696)
