@@ -2,6 +2,8 @@
 
 Latest pre-release : v09 [![DOI](https://zenodo.org/badge/342195575.svg)](https://zenodo.org/badge/latestdoi/342195575)
 
+Docs website : https://advanced-research-centre.github.io/QKSA/ (under construction)
+
 Artificial-Life + General-Reinforcement-Learning + Digital-Physics
 
 Recent pre-print with motivation, core thesis and baseline framework: [here](<./21-07-05 - QKSA.pdf>), [arXiv](https://arxiv.org/abs/2107.01429)
