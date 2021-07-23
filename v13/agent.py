@@ -11,6 +11,7 @@ from qpt import qpt
 from environment import environment
 import qiskit.quantum_info as qi
 import matplotlib.pyplot as plt
+from datetime import datetime
 
 class agent:
 				
@@ -290,6 +291,15 @@ class agent:
 				i += 6
 		fobj.close()
 
+	def log(self):
+		fname = open("results/runlog.txt", "a")
+		now = datetime.now()
+		fname.write("\n"+str(now)+"\n")
+		for r in self.hist_r:
+			fname.write(str(r)+"\n")
+		fname.close()
+		return
+
 	def run(self):
 
 		# Create Quantum Process Tomography Object and Environment
@@ -299,7 +309,9 @@ class agent:
 		self.exp_env.createEnv(qptCirc)		
 
 		rho_choi_pred = self.exp.est_choi(self.hist_a, self.hist_e)
-		print("Initial estimated environment:\n",rho_choi_pred)
+		print("Initial estimated environment:\n")#,rho_choi_pred)
+		for line in rho_choi_pred:
+			print ('  '.join(map(str, line)))
 
 		while (self.t < self.lifespan):
 
@@ -341,19 +353,25 @@ class agent:
 		print("Lived life to the fullest")
 
 		rho_choi = self.exp.est_choi(self.hist_a, self.hist_e)
-		print("Learnt environment:\n",rho_choi)
+		print("Learnt environment:\n")#,rho_choi)
+		for line in rho_choi:
+			print ('  '.join(map(str, line)))
 
-		self.loadHist("data/AAQPT_full.txt")						
-		rho_choi_full = self.exp.est_choi(self.hist_a, self.hist_e)
-		print("Target environment:\n",rho_choi_full)
-		# print("Target environment:\n",rho_choi_analytical)
-
-		kg = self.DeltaDM(rho_choi_full,rho_choi)
-		print("Remaining Knowledge Gap:",kg)
+		# self.log()
 
 		plt.plot(list(self.hist_r))
 		plt.ylabel('trace distance')
+		plt.ylim(0,1)
 		plt.show()
+
+		# print("Target environment:\n",rho_choi_analytical)
+
+		# self.loadHist("data/AAQPT_full.txt")						
+		# rho_choi_full = self.exp.est_choi(self.hist_a, self.hist_e)
+		# print("Target environment:\n",rho_choi_full)
+
+		# kg = self.DeltaDM(rho_choi_full,rho_choi)
+		# print("Remaining Knowledge Gap:",kg)
 
 		return
 
