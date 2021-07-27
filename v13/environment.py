@@ -52,6 +52,10 @@ class environment:
 				qcirc.t(0)
 				qcirc.h(0)	
 				qcirc.t(0)
+				qcirc.h(0)	
+				qcirc.t(0)
+				qcirc.h(0)	
+				qcirc.t(0)
 				# add custom code above
 			elif stateSel == 6:
 				print("GHZ-state on "+str(self.num_qb)+" qubits selected")
