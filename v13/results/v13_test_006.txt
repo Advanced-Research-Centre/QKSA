@@ -1,0 +1,61 @@
+(qeait) D:\GoogleDrive\RESEARCH\A1 - Programs\QKSA\v13>python QKSA.py
+Number of qubits : 1
+
+. . . environment being setup . . .
+
+1: All-Zeros
+2: Equal Superposition
+3: Random Pauli
+4: Random U
+5: Custom Test Env.
+6: GHZ-state
+7: W-state
+
+Choose Environment State : 2
+Equal Superposition state on 1 qubits selected
+
+     ┌───┐
+q_0: ┤ H ├
+     └───┘
+
+. . . environment setup complete . . .
+
+Agent Alive and Ticking
+
+. . . environment being setup . . .
+
+1: Qiskit QASM simulator
+2: IBMQ Belem 5q
+
+Choose Environment Backend for Agent: 2
+IBMQ Belem 5q backend selected
+D:\Users\aritr\anaconda3\envs\qeait\lib\site-packages\qiskit\providers\ibmq\ibmqfactory.py:109: UserWarning: Timestamps in IBMQ backend properties, jobs, and job results are all now in local time instead of UTC.
+  warnings.warn('Timestamps in IBMQ backend properties, jobs, and job results '
+
+      ░      ┌───┐ ░ ┌────┐ ░
+q_0: ─░──────┤ X ├─░─┤ QP ├─░─
+      ░ ┌───┐└─┬─┘ ░ └────┘ ░
+q_1: ─░─┤ H ├──■───░────────░─
+      ░ └───┘      ░        ░
+c: 2/═════════════════════════
+
+
+. . . environment setup complete . . .
+
+Initial estimated environment:
+
+(0.25+0j)  0j  0j  0j
+0j  (0.25+0j)  0j  0j
+0j  0j  (0.25+0j)  0j
+0j  0j  0j  (0.25+0j)
+
+Progress... |████████████████████████████████████████████████████████████████| 400/400 steps [6655 / 0 sec]  
+
+Lived life to the fullest
+
+Learnt environment:
+
+(0.36044973544973546+0j)  (0.2975528364849833+0.022727272727272735j)  (0.17727272727272728-0.04326923076923076j)  (-0.2592592592592593-0.021645021645021648j)
+(0.2975528364849833-0.022727272727272735j)  (0.31812169312169314+0j)  (0.09259259259259259-0.0974025974025974j)  (-0.22272727272727275-0.08173076923076925j)
+(0.17727272727272728+0.04326923076923076j)  (0.09259259259259259+0.0974025974025974j)  (0.15806878306878303+0j)  (-0.07341490545050056+0.022727272727272735j)
+(-0.2592592592592593+0.021645021645021648j)  (-0.22272727272727275+0.08173076923076925j)  (-0.07341490545050056-0.022727272727272735j)  (0.16335978835978837+0j)

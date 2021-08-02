@@ -1,7 +1,9 @@
-from qiskit import QuantumCircuit, Aer, execute
+from qiskit import QuantumCircuit, Aer, execute, IBMQ
+from qiskit.tools.monitor import job_monitor
 from random import randint, uniform
 from math import pi
 from copy import deepcopy
+import sys
 
 class environment:
 
@@ -10,7 +12,8 @@ class environment:
 	num_qb = 0			# Number of qubits the environment is defined on
 	allZ = True
 	basis = []
-	simulator = Aer.get_backend('qasm_simulator')
+	backend = None
+	qcsim = True
 
 	def __init__(self, num_qb):
 		self.num_qb = num_qb
@@ -68,8 +71,27 @@ class environment:
 				print("current bug = future feature!")
 			else:
 				print("Invalid selection! Default All-Zero state on "+str(self.num_qb)+" qubits selected")
+		else:
+			backendSel = int(input("1: Qiskit QASM simulator\n2: IBMQ Belem 5q\n\nChoose Environment Backend for Agent: ") or "1")
+			if backendSel == 1:
+				print("Qiskit QASM simulator backend selected")
+				self.backend = Aer.get_backend('qasm_simulator')
+			elif backendSel == 2:
+				print("IBMQ Belem 5q backend selected")
+				fname = open(sys.path[0] + '\..\..\ibmq.txt')	# The IBMQ API Key should be in the text file in the same directory as QKSA. Tested on Anaconda + Windows.
+				api = fname.readline()
+				fname.close()
+				IBMQ.enable_account(api)
+				provider = IBMQ.get_provider('ibm-q')
+				self.backend = provider.get_backend('ibmq_belem')
+				self.qcsim = False
+			else:
+				print("Invalid selection! Default Qiskit QASM simulator selected")
+
+		print()
 		print(qcirc.draw())
 		self.qpCirc = qcirc
+
 		print("\n. . . environment setup complete . . .\n")
 	
 	def saveEnv(self):
@@ -101,6 +123,13 @@ class environment:
 		circ.barrier()	
 		# print(circ.draw())
 		
-		result = execute(circ, self.simulator, shots=1, memory=True).result()
+		job = execute(circ, self.backend, shots=1, memory=True)
+		if self.qcsim == False:
+			job_monitor(job, quiet=True)
+		result = job.result()
 		memory = result.get_memory()
 		return memory 
+
+	def suspendEnv(self):
+		if self.qcsim == False:
+			IBMQ.disable_account()

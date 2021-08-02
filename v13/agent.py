@@ -12,6 +12,7 @@ from environment import environment
 import qiskit.quantum_info as qi
 import matplotlib.pyplot as plt
 from datetime import datetime
+from progress.bar import Bar
 
 class agent:
 				
@@ -291,10 +292,11 @@ class agent:
 				i += 6
 		fobj.close()
 
-	def log(self):
+	def log(self, desc):
 		fname = open("results/runlog.txt", "a")
 		now = datetime.now()
 		fname.write("\n"+str(now)+"\n")
+		fname.write("\n"+str(desc)+"\n")
 		for r in self.hist_r:
 			fname.write(str(r)+"\n")
 		fname.close()
@@ -312,7 +314,9 @@ class agent:
 		print("Initial estimated environment:\n")#,rho_choi_pred)
 		for line in rho_choi_pred:
 			print ('  '.join(map(str, line)))
-
+		print()
+		
+		bar = Bar('Progress...', width = 64, fill='█', max=self.lifespan, suffix = '%(index)d/%(max)d steps [%(elapsed)s / %(eta)d sec]')
 		while (self.t < self.lifespan):
 
 			if (self.R_t < self.R_D):			# Halt agent (die)
@@ -349,15 +353,18 @@ class agent:
 				genes_new = self.mutate(genes)
 				self.constructor(genes_new)
 			self.t += 1
-
-		print("Lived life to the fullest")
-
+			bar.next()
+		
+		bar.finish()
+		print("\nLived life to the fullest")
+		self.exp_env.suspendEnv()
+	
 		rho_choi = self.exp.est_choi(self.hist_a, self.hist_e)
-		print("Learnt environment:\n")#,rho_choi)
+		print("\nLearnt environment:\n")#,rho_choi)
 		for line in rho_choi:
 			print ('  '.join(map(str, line)))
 
-		# self.log()
+		self.log(desc="IBMQ_1q_H_rand")
 
 		plt.plot(list(self.hist_r))
 		plt.ylabel('trace distance')
