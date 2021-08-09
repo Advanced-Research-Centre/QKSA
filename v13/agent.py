@@ -147,21 +147,46 @@ class agent:
 	
 	def Delta(self, e_i, e_j):
 		# Distance function between elements in percept space
-		dist_e_ij = 0
-		for (i,j) in zip(e_i,e_j):
-			if i!=j:
-				dist_e_ij += 1					# Hamming distance
-		dist_e_ij = len(e_i) - dist_e_ij
-		return dist_e_ij
+		return self.DeltaDD(e_i, e_j)
 
+	'''
+	Hamming distance between two strings
+	https://en.wikipedia.org/wiki/Hamming_distance
+	'''
+	def DeltaHD(self, config_i, config_j):
+		dist = 0
+		for (i,j) in zip(config_i,config_j):
+			if i!=j:
+				dist += 1
+		dist = len(config_i) - dist
+		return dist
+		
 	'''
 	Trace distance between two density matrices
 	https://en.wikipedia.org/wiki/Trace_distance
 	'''
-	def DeltaDM(self, dm_i, dm_j):
-		# Distance function between elements in percept space
-		dist_dm_ij = np.real(np.trace(np.sqrt(np.matmul((dm_i - dm_j).conjugate().transpose(),dm_i - dm_j))) / 2)
-		return dist_dm_ij
+	def DeltaTD(self, dm_i, dm_j):
+		dist = np.real(np.trace(np.sqrt(np.matmul((dm_i - dm_j).conjugate().transpose(),dm_i - dm_j))) / 2)
+		return dist
+
+	'''
+	Bures distance between two density matrices
+	https://en.wikipedia.org/wiki/Bures_metric
+	Bures metric or Helstrom metric defines an infinitesimal distance between density matrix operators defining quantum states. 
+	It is a quantum generalization of the Fisher information metric, and is identical to the Fubini–Study metric when restricted to the pure states alone.
+	'''
+	def DeltaBD(self, dm_i, dm_j):
+		fid = np.trace(np.sqrt( np.matmul(np.sqrt(dm_i), np.matmul(dm_j,np.sqrt(dm_i))) ))**2
+		dist = np.sqrt(2*(1-np.sqrt(fid))) 
+		return dist
+
+	'''
+	Diamond distance between two density matrices
+	https://en.wikipedia.org/wiki/Diamond_norm
+	'''
+	def DeltaDD(self, dm_i, dm_j):
+		dist = qi.diamond_norm(dm_i-dm_j)
+		return dist
 
 	'''
 	Given the history, choose an action for the current step that would have the highest utility
@@ -293,7 +318,7 @@ class agent:
 		fobj.close()
 
 	def log(self, desc):
-		fname = open("results/runlog.txt", "a")
+		fname = open("results/runlog_"+desc+".txt", "a")
 		now = datetime.now()
 		fname.write("\n"+str(now)+"\n")
 		fname.write("\n"+str(desc)+"\n")
@@ -341,7 +366,7 @@ class agent:
 
 			# This is the reward/utility (knowledge gain), thus, higher the knowledge gain (error in prediction) the better
 			# When knowledge gain falls below a limit, learning is finished and QKSA reproduces with mutated cost fn.
-			r_t = self.DeltaDM(rho_choi_pred,rho_choi)	# Reward based on Hamming/KL/Trace distance between perception and prediction
+			r_t = self.Delta(rho_choi_pred,rho_choi)	# Reward based on Hamming/KL/Trace distance between perception and prediction
 			# r_t = self.Delta(rho_t_star, e_t)	
 			
 			self.hist_r.append(r_t)
@@ -364,10 +389,10 @@ class agent:
 		for line in rho_choi:
 			print ('  '.join(map(str, line)))
 
-		self.log(desc="IBMQ_1q_H_rand")
+		self.log(desc="QSim_H_rand_DD")
 
 		plt.plot(list(self.hist_r))
-		plt.ylabel('trace distance')
+		plt.ylabel('bures distance')
 		plt.ylim(0,1)
 		plt.show()
 

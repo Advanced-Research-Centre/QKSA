@@ -1,0 +1,61 @@
+(qeait) D:\GoogleDrive\RESEARCH\A1 - Programs\QKSA\v13>python QKSA.py
+Number of qubits : 1
+
+. . . environment being setup . . .
+
+1: All-Zeros
+2: Equal Superposition
+3: Random Pauli
+4: Random U
+5: Custom Test Env.
+6: GHZ-state
+7: W-state
+
+Choose Environment State : 2
+Equal Superposition state on 1 qubits selected
+
+     ┌───┐
+q_0: ┤ H ├
+     └───┘
+
+. . . environment setup complete . . .
+
+Agent Alive and Ticking
+
+. . . environment being setup . . .
+
+1: Qiskit QASM simulator
+2: IBMQ Belem 5q
+
+Choose Environment Backend for Agent: 1
+Qiskit QASM simulator backend selected
+
+      ░      ┌───┐ ░ ┌────┐ ░
+q_0: ─░──────┤ X ├─░─┤ QP ├─░─
+      ░ ┌───┐└─┬─┘ ░ └────┘ ░
+q_1: ─░─┤ H ├──■───░────────░─
+      ░ └───┘      ░        ░
+c: 2/═════════════════════════
+
+
+. . . environment setup complete . . .
+
+Initial estimated environment:
+
+(0.25+0j)  0j  0j  0j
+0j  (0.25+0j)  0j  0j
+0j  0j  (0.25+0j)  0j
+0j  0j  0j  (0.25+0j)
+
+D:\Users\asarkar5\Anaconda3\envs\qeait\lib\site-packages\numpy_ringbuffer\__init__.py:78: ComplexWarning: Casting complex values to real discards the imaginary part
+  self._arr[self._right_index % self._capacity] = value
+Progress... |████████████████████████████████████████████████████████████████| 2000/2000 steps [69 / 0 sec]
+
+Lived life to the fullest
+
+Learnt environment:
+
+(0.24395862785262973+0j)  (0.24427480916030536+0.013382336438110196j)  (0.2358490566037736-0.042132670572223224j)  (-0.2840909090909091-0.006025333789798019j)
+(0.24427480916030536-0.013382336438110196j)  (0.2014959176019157+0j)  (0.2159090909090909-0.0451557685724067j)  (-0.2641509433962264-0.022752825610982894j)
+(0.2358490566037736+0.042132670572223224j)  (0.2159090909090909+0.0451557685724067j)  (0.33865006779954415+0j)  (-0.25572519083969464-0.07308382897542363j)
+(-0.2840909090909091+0.006025333789798019j)  (-0.2641509433962264+0.022752825610982894j)  (-0.25572519083969464+0.07308382897542363j)  (0.21589538674591036+0j)
