@@ -73,13 +73,14 @@ agt_waitlist.append('agent_0')
 
 while (len(biosphere) + len(agt_waitlist) > 0):							# No agents alive, every agent serviced!
 
-	print("\nHypervisor status --- \n\tRunning\t\t:",biosphere,"\n\tWaitlist\t:",list(agt_waitlist),"\n\tDead\t\t:",run_log)
-	
-	abort = int(input("===> 0: Continue  1: Abort  [Default: 0]: ") or 0)
+	if abort != 2:
+		print("\nHypervisor status --- \n\tRunning\t\t:",biosphere,"\n\tWaitlist\t:",list(agt_waitlist),"\n\tDead\t\t:",run_log)
+		abort = int(input("===> 0: Continue  1: Abort  2: Auto [Default: 0]: ") or 0)
+		
 	if abort == 1:														# User gets to choose each cycle (world clock tick) to abort or continue
 		for agt in biosphere:
 			print("Killing agent:",agt[0])
-			agt[1].halt()  									                # Run one perception cycle for the agent
+			agt[1].halt()  									            # Run one perception cycle for the agent
 			aborted.append(agt[0])
 			biosphere.remove(agt)		
 		break
@@ -91,7 +92,8 @@ while (len(biosphere) + len(agt_waitlist) > 0):							# No agents alive, every a
 		biosphere.append([agtName,agtObj])
 		
 	for agt in biosphere:
-		print("Running agent:",agt[0])
+		if abort != 2:
+			print("Running agent:",agt[0])
 		agt[1].run()  									                # Run one perception cycle for the agent
 		if agt[1].alive == False:										# If enough hazard has been encountered
 			run_log.append(agt[0])

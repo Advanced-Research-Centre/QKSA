@@ -188,6 +188,13 @@ class agent:
 
 	# Core method
 	def halt(self):
+		for qpt in self.qptPool:
+			print("   QPT strategy: "+qpt[1].name, qpt,'\n')
+			rho_choi_curr = qpt[1].est_choi(self.hist_a, self.hist_e)
+			print("Current estimated environment:\n")
+			for line in rho_choi_curr:
+				print ('  '.join(map(str, line)))
+			print()		
 		if hasattr(self, 'exp_env'):
 			self.exp_env.suspendEnv()
 		self.alive = False
@@ -214,15 +221,17 @@ class agent:
 		# print(self.E)
 		qpt_star = []
 
+		
 		for qpt in self.qptPool:					# For each process reconstruction algorithm (qpt)
 			
-			print("   QPT strategy: "+qpt[1].name, qpt,'\n')
+			# print("   QPT strategy: "+qpt[1].name, qpt,'\n')
 
-			rho_choi_curr = qpt[1].est_choi(self.hist_a, self.hist_e)
-			print("Current estimated environment:\n")
-			for line in rho_choi_curr:
-				print ('  '.join(map(str, line)))
-			print()
+			if self.t == 0:
+				rho_choi_curr = qpt[1].est_choi(self.hist_a, self.hist_e)
+				print("Current estimated environment:\n")
+				for line in rho_choi_curr:
+					print ('  '.join(map(str, line)))
+				print()			
 		
 			# Run policy to use that qpt to generate best action and prediction based on estimated utility
 			a_t_star = self.policy(qpt[2])		# Action chosen by the agent at time step t.
@@ -244,3 +253,5 @@ class agent:
 			
 		if (self.R_t < self.R_D or self.t == self.lifespan):	# Halt agent (die)
 			self.halt()
+
+		self.t += 1	

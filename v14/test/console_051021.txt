@@ -47,7 +47,7 @@ Hypervisor status ---
         Running         : []
         Waitlist        : ['agent_0']
         Dead            : []
-===> 0: Continue  1: Abort  [Default: 0]:
+===> 0: Continue  1: Abort  2: Auto [Default: 0]:
 
 Creating Environment for agent_0 QPT algorithm EAQPT
 
@@ -69,9 +69,7 @@ c: 2/═════════════════════════
 
 . . . environment setup complete . . .
 Running agent: agent_0
-   QPT strategy: EAQPT [0, <src.qpt_0.qpt object at 0x00000231FCCCBDC0>, <src.environment.environment object at 0x00000231FDAF6700>]
-
-Initial estimated environment:
+Current estimated environment:
 
 (0.25+0j)  0j  0j  0j
 0j  (0.25+0j)  0j  0j
@@ -80,14 +78,31 @@ Initial estimated environment:
 
 
 Hypervisor status ---
-        Running         : [['agent_0', <src.agent_0.agent object at 0x00000231CCEE88B0>]]
+        Running         : [['agent_0', <src.agent_0.agent object at 0x000001BD93087F70>]]
         Waitlist        : []
         Dead            : []
-===> 0: Continue  1: Abort  [Default: 0]: 1
-Killing agent: agent_0
+===> 0: Continue  1: Abort  2: Auto [Default: 0]:
+Running agent: agent_0
+
+Hypervisor status ---
+        Running         : [['agent_0', <src.agent_0.agent object at 0x000001BD93087F70>]]
+        Waitlist        : []
+        Dead            : []
+===> 0: Continue  1: Abort  2: Auto [Default: 0]: 2
+   QPT strategy: EAQPT [0, <src.qpt_0.qpt object at 0x000001BDC320EBB0>, <src.environment.environment object at 0x000001BDC40366D0>]
+
+Current estimated environment:
+
+(0.25+0j)  (0.009009009009009014+0.03008298755186721j)  (-0.013157894736842105-0.016393442622950838j)  (-0.23774509803921567+0.0129193246533717j)
+(0.009009009009009014-0.03008298755186721j)  (0.25+0j)  (0.2622549019607843-0.019831767049685062j)  (-0.013157894736842105-0.016393442622950838j)
+(-0.013157894736842105+0.016393442622950838j)  (0.2622549019607843+0.019831767049685062j)  (0.25+0j)  (0.009009009009009014+0.03008298755186721j)
+(-0.23774509803921567-0.0129193246533717j)  (-0.013157894736842105+0.016393442622950838j)  (0.009009009009009014-0.03008298755186721j)  (0.25+0j)
+
 
 Final status ---
         Running         : []
         Waitlist        : []
-        Dead            : []
-        Aborted         : ['agent_0']
+        Dead            : ['agent_0']
+        Aborted         : []
+
+(qeait) D:\GoogleDrive\RESEARCH\A1 - Programs\QKSA\v14>

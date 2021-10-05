@@ -94,12 +94,14 @@ class environment:
 
 	def define_A(self):
 		# define action space A as all 3-axis basis of self.num_qb qubits
+		self.A = []
 		for i in range(3**self.num_qb):
 			self.A.append(str(self.DecToBaseN(i,3,self.num_qb)))
 		return
 
 	def define_E(self):
 		# Define percept space E as all binary strings of self.num_qb qubits
+		self.E = []
 		for i in range(2**self.num_qb):
 			self.E.append(str(self.DecToBaseN(i,2,self.num_qb)))
 		return
