@@ -3,6 +3,7 @@ from src.least import least
 from src.metrics import metrics
 from src.qpt_1 import qpt
 
+import importlib
 import random
 import copy
 import numpy as np
@@ -58,55 +59,38 @@ class agent:
 		self.env	= env
 		self.genes	= [self.c_gene, self.wt_gene, self.l_max, self.e_max, self.a_max, self.s_max, self.t_max, self.m_c, self.neighbours, self.t_p, self.t_f, self.gamma, self.R_R, self.R_D, self.lifespan]
 
-		self.t			= 0									# Age of agent in number of runStep calls
-		self.R_t 		= 0									# Cumulative discounted return at time step t.
-		self.hist_a		= RingBuffer(capacity=self.t_p, dtype='object')						# History of actions
-		self.hist_e		= RingBuffer(capacity=self.t_p, dtype='object')						# History of perceptions
+		self.t			= 0													# Age of agent in number of runStep calls
+		self.R_t 		= 0													# Cumulative discounted return at time step t
+		self.hist_a		= RingBuffer(capacity=self.t_p, dtype='object')		# History of actions
+		self.hist_e		= RingBuffer(capacity=self.t_p, dtype='object')		# History of perceptions
 		self.hist_r		= RingBuffer(capacity=self.t_p)	
-		
-		self.define_A(len(self.neighbours))						# Action space [NEEDED?]
-		self.define_E(len(self.neighbours))						# Percept space [NEEDED?]
-
 		self.least		= least()
 		self.metrics	= metrics()
+
+		# Make set of QPT objects based on available techniques
+		self.qptNos		= 1															# Number of QPT techniques to be considered
+		self.qptPool	= []
+		for i in range(0,self.qptNos):
+			agtClass = getattr(importlib.import_module('src.qpt_'+str(i)), "qpt")	# Filename changes for each qpt while class name remains same
+			agtObj = agtClass(self.env.num_qb)										# QPT gets instantiated here
+			exp_env = environment(agtObj.num_qb)
+			print("\nCreating Environment for "+self.name+" QPT algorithm "+agtObj.name)
+			exp_env.createEnv(agtObj.setup(self.env.qpCirc))
+			self.qptPool.append([i,agtObj,exp_env])
 
 		self.newChildName 	= ''
 		self.childCtr 		= 0
 		self.alive			= True
 
-	# Utility method		
-	def DecToBaseN(self, n, b, l):
-		s = ''
-		while n != 0:
-			s = str(n%b)+s
-			n = n//b
-		return ('0'*(l-len(s)))+s
-
 	# Core method
-	def define_A(self, numQb):
-		# define action space A as all 3-axis basis of numQb qubits
-		self.A = []
-		for i in range(3**numQb):
-			self.A.append(str(self.DecToBaseN(i,3,numQb)))
-		return
-
-	# Core method
-	def define_E(self, numQb):
-		# Define percept space E as all binary strings of numQb qubits
-		self.E = []
-		for i in range(2**numQb):
-			self.E.append(str(self.DecToBaseN(i,2,numQb)))
-		return
-
-	# Core method
-	def act(self, a_t_star):
+	def act(self, env, a_t_star):
 		# check if a_t_star is a member of the set A, else raise error
-		self.exp_env.action(a_t_star)
+		env.action(a_t_star)
 		return
 
 	# Core method
-	def perceive(self):
-		e_t = self.exp_env.perception(list(range(0,self.exp.num_qb)))
+	def perceive(self, env):
+		e_t = env.perception(list(range(0,env.num_qb)))
 		# check if e_t is a member of the set E, else raise error
 		return e_t[0]
 
@@ -181,11 +165,12 @@ class agent:
 		return
 
 	# Core method
-	def policy(self):
+	def policy(self, env):
 		'''
 		Given the history, choose an action for the current step that would have the highest utility
 		'''
-		return
+		a_t_star = ['E', random.choice(env.A)]
+		return a_t_star
 
 	# Core method
 	def mutate(self):
@@ -203,7 +188,8 @@ class agent:
 
 	# Core method
 	def halt(self):
-		self.exp_env.suspendEnv()
+		if hasattr(self, 'exp_env'):
+			self.exp_env.suspendEnv()
 		self.alive = False
 		return
 
@@ -217,8 +203,6 @@ class agent:
 		# NEW: Given hist of a,e, a_t and e_t, predict the probability of e_t
 		return
 
-
-
 	# Core method
 	def run(self):
 		
@@ -226,15 +210,32 @@ class agent:
 			
 		self.t_p_max = self.t if (self.t-self.t_p) < 0 else self.t_p	 # How much historic data is available (adjusted for initial few steps) for calculating return
 		
-		print("run step")
-		# Choose process reconstruction algorithm (qpt)
-		# Run policy to use that qpt to generate best action and prediction based on estimated utility
-		# Run action and get perception
+		# print(self.A)
+		# print(self.E)
+		qpt_star = []
+
+		for qpt in self.qptPool:					# For each process reconstruction algorithm (qpt)
+			
+			print("   QPT strategy: "+qpt[1].name, qpt,'\n')
+
+			rho_choi_curr = qpt[1].est_choi(self.hist_a, self.hist_e)
+			print("Current estimated environment:\n")
+			for line in rho_choi_curr:
+				print ('  '.join(map(str, line)))
+			print()
+		
+			# Run policy to use that qpt to generate best action and prediction based on estimated utility
+			a_t_star = self.policy(qpt[2])		# Action chosen by the agent at time step t.
+			# rho_t_star = self.predict(a_t_star)
+			qpt_star = qpt
+
+		self.act(qpt_star[2], a_t_star)		# Action performed by the agent at time step t.
+		e_t = self.perceive(qpt_star[2])	# Perception recorded by the agent at time step t.
+		self.hist_a.append(a_t_star)		# Update action history
+		self.hist_e.append(e_t)				# Update perception history
+		
 		# Use that on qpt to get new model and access reward/return/utility
 
-			
-
-		
 		self.newChildName = ''
 		if (self.R_t < self.R_R):								# Reproduce
 			self.newChildName = 'agent_'+int(self.childCtr)

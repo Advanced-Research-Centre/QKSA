@@ -13,6 +13,8 @@ class environment:
 	backend = None
 	qcsim = 'qasm_simulator'	# Default environment simulator
 	basis = []
+	A = []						# Action space
+	E = []						# Perception space
 	
 	def __init__(self, num_qb):
 		self.num_qb = num_qb
@@ -62,7 +64,7 @@ class environment:
 			else:
 				print("Invalid selection! Default All-Zero state on "+str(self.num_qb)+" qubits selected")
 		else:
-			backendSel = int(input("1: Qiskit QASM simulator\n2: IBMQ Belem 5q\n\nChoose Environment Backend for Agent: ") or "1")
+			backendSel = int(input("1: Qiskit QASM simulator\n2: IBMQ Belem 5q\n\nChoose Environment Backend [Default: 1]: ") or "1")
 			if backendSel == 1:
 				print("Qiskit QASM simulator backend selected")
 				self.backend = Aer.get_backend(self.qcsim)
@@ -76,10 +78,31 @@ class environment:
 				self.backend = provider.get_backend('ibmq_belem')
 			else:
 				print("Invalid selection! Default Qiskit QASM simulator selected")
+		self.define_A()
+		self.define_E()
 		print()
 		print(qcirc.draw())
 		self.qpCirc = qcirc
-		print("\n. . . environment setup complete . . .\n")
+		print("\n. . . environment setup complete . . .")
+
+	def DecToBaseN(self, n, b, l):
+		s = ''
+		while n != 0:
+			s = str(n%b)+s
+			n = n//b
+		return ('0'*(l-len(s)))+s
+
+	def define_A(self):
+		# define action space A as all 3-axis basis of self.num_qb qubits
+		for i in range(3**self.num_qb):
+			self.A.append(str(self.DecToBaseN(i,3,self.num_qb)))
+		return
+
+	def define_E(self):
+		# Define percept space E as all binary strings of self.num_qb qubits
+		for i in range(2**self.num_qb):
+			self.E.append(str(self.DecToBaseN(i,2,self.num_qb)))
+		return
 
 	def saveEnv(self):
 		fname = open("env.qasm", "w")

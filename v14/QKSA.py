@@ -1,5 +1,28 @@
 from src.environment import environment
 
+welcome = '\n\n\
+###########################################################################################################\n\
+\n\
+        QQQQQQQQQ        KKKKKKKKK    KKKKKKKK       SSSSSSSSSSSSS                     ____							\n\
+     QQ:::::::::QQ       K:::::::K    K:::::KK     SS::::::::::::::S                 / \\   \\						\n\
+   QQ:::::::::::::QQ     K:::::::K    K::::::K    S:::::SSSSSS::::::S               /   \\___\\						\n\
+  Q:::::::QQQ:::::::Q    K:::::::K   K::::::K     S:::::S     SSSSSSS              _\\   /   /__					\n\
+  Q::::::O   Q::::::Q    KK::::::K  K:::::KK      SS::::S                        / \\ \\ /_/ \\   \\				\n\
+  Q:::::O     Q:::::Q    K::::::K K:::::KK          SS::::::SS                  /   \\___/   \\___\\				\n\
+  Q:::::O     Q:::::Q    K::::::K K:::::K            SSS:::::::SS              _\\   /   \\   /   /__				\n\
+  Q:::::O     Q:::::Q    K::::::K:::::K               SSSSSS::::SS           / \\ \\ /___/ \\ /_/ \\   \\			\n\
+  Q:::::O  QQQQ:::::Q    K::::::KK:::::KK                  S:::::SS         /   \\___\\       /   \\___\\			\n\
+  Q::::::O Q::::::::Q    KK::::::K  K:::::KK                 S:::::S       _\\   /   /__     \\__ /  _/__			\n\
+  Q:::::::QQ::::::::Q    K:::::::K   K::::::K    SSSSSSS    SS:::::S     / \\ \\ /___/   \\ / \\   \\ / \\   \\		\n\
+   QQ::::::::::::::Q     K:::::::K    K:::::K    S::::::SSSSSS:::::S    /   \\___\\   \\___\\   \\___\\   \\___\\	\n\
+     QQ:::::::::::Q      K:::::::K    K:::::KK    S:::::::::::::::SS    \\   /   /   /   /   /   /   /   /			\n\
+      QQQQQQQQ::::QQ     KKKKKKKKK    KKKKKKKK     SSSSSSSSSSSSSSS       \\ /___/ \\ /___/ \\ /___/ \\ /___/		\n\
+               Q:::::Q                       																		\n\
+                QQQQQQ                                                                  \u00a9 Aritra Sarkar	    \n\
+\n\
+###########################################################################################################\n\n'    
+print(welcome)
+
 ''' Create Quantum Process Environment '''
 
 num_qb = int(input("===> Specify number of qubits [Default: 1]: ") or "1")
@@ -41,6 +64,7 @@ import importlib
 biosphere = []							# Agents currently running
 agt_waitlist = deque()					# Queue containing agents that are created but yet to be executed
 run_log = []							# Agents which have already executed and died
+aborted = []
 abort = 0								# Flag to terminate all processes
 max_thread = 1							# How many agents can be handled in parallel by the hypervisor threads
 max_queue = 2
@@ -49,14 +73,14 @@ agt_waitlist.append('agent_0')
 
 while (len(biosphere) + len(agt_waitlist) > 0):							# No agents alive, every agent serviced!
 
-	print("\nHypervisor status --- \n\tRunning:",biosphere,"\n\tWaitlist:",list(agt_waitlist),"\n\tDead:",run_log)
+	print("\nHypervisor status --- \n\tRunning\t\t:",biosphere,"\n\tWaitlist\t:",list(agt_waitlist),"\n\tDead\t\t:",run_log)
 	
-	abort = int(input("===> 0: Continue  1: Abort  [Default: 0]:") or 0)
+	abort = int(input("===> 0: Continue  1: Abort  [Default: 0]: ") or 0)
 	if abort == 1:														# User gets to choose each cycle (world clock tick) to abort or continue
 		for agt in biosphere:
 			print("Killing agent:",agt[0])
 			agt[1].halt()  									                # Run one perception cycle for the agent
-			run_log.append(agt[0])
+			aborted.append(agt[0])
 			biosphere.remove(agt)		
 		break
 	
@@ -86,7 +110,7 @@ from progress.bar import Bar
 # bar.next()
 # bar.finish()
 
-print("\nFinal status --- \n\tRunning:",biosphere,"\n\tWaitlist:",list(agt_waitlist),"\n\tDead:",run_log)
+print("\nFinal status --- \n\tRunning\t\t:",biosphere,"\n\tWaitlist\t:",list(agt_waitlist),"\n\tDead\t\t:",run_log,"\n\tAborted\t\t:",aborted)
 
 # for agt in run_log:
 # 	agt[1].log(desc="QSim_H_rand_DD")

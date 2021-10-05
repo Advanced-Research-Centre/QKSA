@@ -1,8 +1,5 @@
-# Currently a clone of qpt_!
-# Change to SQPT or AAQPT later
-
 """
-Ancilla Assisted Quantum Process Tomography on n-qubits
+Entanglement Assisted Quantum Process Tomography on n-qubits
 Construct Choi density matrix of process from tomographic trials
 """
 
@@ -14,7 +11,7 @@ from qiskit import QuantumCircuit
 
 class qpt:
 
-    name = 'AAQPT'
+    name = 'EAQPT'
 
     def __init__(self, num_qb_qp):
 
