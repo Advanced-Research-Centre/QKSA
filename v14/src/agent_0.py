@@ -32,7 +32,9 @@ class agent:
 	gamma		= 0						
 	R_R			= 0							
 	R_D			= 0							
-	lifespan	= 0						
+	lifespan	= 0
+
+	LOG_TEST = []						
 
 	def __init__(self, name, env, genes):
 				
@@ -165,12 +167,81 @@ class agent:
 		return
 
 	# Core method
-	def policy(self, env):
+	def predict(self, qpt, past_a, a_k, past_e, e_pred_k):
+		# Given hist of a,e, a_t and e_t, predict the probability of e_t	
+		rho_choi = qpt[1].est_choi(past_a, past_e) # Current estimated environment from history of action and perception till last step (t-1)
+		# Perception based on rho_choi and a_t
+		pr_qcirc = QuantumCircuit(qpt[1].num_qb)
+		prb = list(reversed(a_k))
+		for i in range(0,len(prb)):
+			if prb[i] == '1':
+				pr_qcirc.ry(-pi/2,i) 	# for measuring along X
+			elif prb[i] == '2':
+				pr_qcirc.rx(pi/2,i) 	# for measuring along Y
+		prU = qi.Operator(pr_qcirc)		# post-rotation unitary
+		pr_rho_choi = np.matmul(prU.data,  np.matmul(rho_choi, prU.conjugate().transpose().data) )
+		dist_pred = np.diag(np.real(pr_rho_choi))
+		lambda_e = dist_pred[int(e_pred_k,2)]
+		return lambda_e
+
+	# Core method
+	def policy(self, qpt):
 		'''
 		Given the history, choose an action for the current step that would have the highest utility
 		'''
-		a_t_star = ['E', random.choice(env.A)]
-		return a_t_star
+		test = True
+		if (test == True):
+			a_t_star = random.choice(qpt[2].A)
+	
+		#
+		# for each t_f
+		#	reconstruct rho
+		#	max_util = -1; a_star = A[0]
+		#	for each action a
+		#		tot_util = 0
+		#		for each prediction e
+		#			find probability of e_pred as lambda_e_pred
+		#			reconstruct rho_pred
+		#			find utility u_pred as distance between rho and rho_pred
+		#			tot_util = lambda_e_pred * u_pred
+		#		if tot_util > max_util:
+		# 			max_util = tot_util
+		# 			a_star = a
+		#
+
+		rho_choi_t = qpt[1].est_choi(self.hist_a, self.hist_e)	# Current model of the environment [Get least cost while doing this]
+		dTree = {}
+		a_t_star = qpt[2].A[0]									# Optimal action for the agent determined by the policy at time step t	
+		
+		def futureCone(k, past_a, past_e, lambda_e_pred):
+			nonlocal a_t_star
+			if k < self.t+self.t_f:
+				for a_k in qpt[2].A: 
+					past_a_new = copy.deepcopy(past_a)
+					past_a_new.append(['E', a_k])
+					for e_pred_k in qpt[2].E:
+						past_e_new = copy.deepcopy(past_e) 
+						past_e_new.append(e_pred_k)
+						lambda_e_pred_new = copy.deepcopy(lambda_e_pred) 
+						lambda_e_pred_new.append(self.predict(qpt, past_a, a_k, past_e, e_pred_k))
+						futureCone(k+1, past_a_new, past_e_new, lambda_e_pred_new)
+			else:
+				lambda_e_pred_m = 1									# Find total probability of sequence of predicted action-perception for t_f steps
+				for lambda_e_pred_k in lambda_e_pred:
+					lambda_e_pred_m *= lambda_e_pred_k
+				rho_choi_m_pred = qpt[1].est_choi(past_a, past_e)	# Find predicted model based on predicted action-perception for t_f steps
+				u_pred = self.Delta(rho_choi_m_pred, rho_choi_t)
+				a_t = past_a[self.t]
+				if a_t[1] in dTree:									# Cumulate weighted utility for same actions in current step
+					dTree[a_t[1]] += lambda_e_pred_m*u_pred
+				else:
+					dTree[a_t[1]] = lambda_e_pred_m*u_pred
+
+		futureCone(self.t, list(self.hist_a), list(self.hist_e), [])
+		a_t_star = max(dTree, key=dTree.get)
+		u_pred_star = max(dTree.values())
+		
+		return ['E', a_t_star], u_pred_star
 
 	# Core method
 	def mutate(self):
@@ -181,8 +252,13 @@ class agent:
 	# Core method
 	def constructor(self, genes):
 		f = open('src/'+self.newChildName+'.py', "w")
-		# add Quine code here
-		f.write("s")
+		# The expression below is used to automatically convert the embed the code within the f.write
+		# QUINE = FALSE
+		dna = '\
+dna=%r\n\
+\tf.write(dna%%(dna,genes))\n\
+\tgenes = %r'
+		f.write(dna%(dna,genes))
 		f.close()
 		return
 
@@ -201,27 +277,12 @@ class agent:
 		return
 
 	# Core method
-	def predict(self, a_t_star):
-		'''
-		Use hist_{a,e} to predict rho_t_star from a_t_star
-			if multiplicity of a_t_star is less that trail, return random rho_t_star
-			else return rho_t_star based on probability of hist_e for a_t_star
-		'''
-		# NEW: Given hist of a,e, a_t and e_t, predict the probability of e_t
-		return
-
-	# Core method
 	def run(self):
-		
 		# Loop handled by Hypervisor
 			
 		self.t_p_max = self.t if (self.t-self.t_p) < 0 else self.t_p	 # How much historic data is available (adjusted for initial few steps) for calculating return
 		
-		# print(self.A)
-		# print(self.E)
 		qpt_star = []
-
-		
 		for qpt in self.qptPool:					# For each process reconstruction algorithm (qpt)
 			
 			# print("   QPT strategy: "+qpt[1].name, qpt,'\n')
@@ -234,16 +295,20 @@ class agent:
 				print()			
 		
 			# Run policy to use that qpt to generate best action and prediction based on estimated utility
-			a_t_star = self.policy(qpt[2])		# Action chosen by the agent at time step t.
-			# rho_t_star = self.predict(a_t_star)
+			a_t_star, u_pred_star = self.policy(qpt)		# Action chosen by the agent at time step t.
 			qpt_star = qpt
 
 		self.act(qpt_star[2], a_t_star)		# Action performed by the agent at time step t.
 		e_t = self.perceive(qpt_star[2])	# Perception recorded by the agent at time step t.
-		self.hist_a.append(a_t_star)		# Update action history
-		self.hist_e.append(e_t)				# Update perception history
 		
 		# Use that on qpt to get new model and access reward/return/utility
+		rho_choi_curr = qpt_star[1].est_choi(self.hist_a, self.hist_e)
+		self.hist_a.append(a_t_star)		# Update action history
+		self.hist_e.append(e_t)				# Update perception history
+		rho_choi_next = qpt_star[1].est_choi(self.hist_a, self.hist_e)
+		u_t = self.Delta(rho_choi_next, rho_choi_curr)
+		R_t = u_pred_star - u_t
+		self.LOG_TEST.append(R_t)
 
 		self.newChildName = ''
 		if (self.R_t < self.R_R):								# Reproduce

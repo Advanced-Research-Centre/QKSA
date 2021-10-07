@@ -2,24 +2,24 @@ from src.environment import environment
 
 welcome = '\n\n\
 ###########################################################################################################\n\
-\n\
-        QQQQQQQQQ        KKKKKKKKK    KKKKKKKK       SSSSSSSSSSSSS                     ____							\n\
-     QQ:::::::::QQ       K:::::::K    K:::::KK     SS::::::::::::::S                 / \\   \\						\n\
-   QQ:::::::::::::QQ     K:::::::K    K::::::K    S:::::SSSSSS::::::S               /   \\___\\						\n\
-  Q:::::::QQQ:::::::Q    K:::::::K   K::::::K     S:::::S     SSSSSSS              _\\   /   /__					\n\
-  Q::::::O   Q::::::Q    KK::::::K  K:::::KK      SS::::S                        / \\ \\ /_/ \\   \\				\n\
-  Q:::::O     Q:::::Q    K::::::K K:::::KK          SS::::::SS                  /   \\___/   \\___\\				\n\
-  Q:::::O     Q:::::Q    K::::::K K:::::K            SSS:::::::SS              _\\   /   \\   /   /__				\n\
-  Q:::::O     Q:::::Q    K::::::K:::::K               SSSSSS::::SS           / \\ \\ /___/ \\ /_/ \\   \\			\n\
-  Q:::::O  QQQQ:::::Q    K::::::KK:::::KK                  S:::::SS         /   \\___\\       /   \\___\\			\n\
-  Q::::::O Q::::::::Q    KK::::::K  K:::::KK                 S:::::S       _\\   /   /__     \\__ /  _/__			\n\
-  Q:::::::QQ::::::::Q    K:::::::K   K::::::K    SSSSSSS    SS:::::S     / \\ \\ /___/   \\ / \\   \\ / \\   \\		\n\
-   QQ::::::::::::::Q     K:::::::K    K:::::K    S::::::SSSSSS:::::S    /   \\___\\   \\___\\   \\___\\   \\___\\	\n\
-     QQ:::::::::::Q      K:::::::K    K:::::KK    S:::::::::::::::SS    \\   /   /   /   /   /   /   /   /			\n\
-      QQQQQQQQ::::QQ     KKKKKKKKK    KKKKKKKK     SSSSSSSSSSSSSSS       \\ /___/ \\ /___/ \\ /___/ \\ /___/		\n\
-               Q:::::Q                       																		\n\
-                QQQQQQ                                                                  \u00a9 Aritra Sarkar	    \n\
-\n\
+                                                                                                           \n\
+        QQQQQQQQQ        KKKKKKKKK    KKKKKKKK       SSSSSSSSSSSSS                     ____                         \n\
+     QQ:::::::::QQ       K:::::::K    K:::::KK     SS::::::::::::::S                 / \\   \\                      \n\
+   QQ:::::::::::::QQ     K:::::::K    K::::::K    S:::::SSSSSS::::::S               /   \\___\\                     \n\
+  Q:::::::QQQ:::::::Q    K:::::::K   K::::::K     S:::::S     SSSSSSS              _\\   /   /__                    \n\
+  Q::::::O   Q::::::Q    KK::::::K  K:::::KK      SS::::S                        / \\ \\ /_/ \\   \\                \n\
+  Q:::::O     Q:::::Q    K::::::K K:::::KK          SS::::::SS                  /   \\___/   \\___\\                \n\
+  Q:::::O     Q:::::Q    K::::::K K:::::K            SSS:::::::SS              _\\   /   \\   /   /__               \n\
+  Q:::::O     Q:::::Q    K::::::K:::::K               SSSSSS::::SS           / \\ \\ /___/ \\ /_/ \\   \\           \n\
+  Q:::::O  QQQQ:::::Q    K::::::KK:::::KK                  S:::::SS         /   \\___\\       /   \\___\\           \n\
+  Q::::::O Q::::::::Q    KK::::::K  K:::::KK                 S:::::S       _\\   /   /__     \\__ /  _/__           \n\
+  Q:::::::QQ::::::::Q    K:::::::K   K::::::K    SSSSSSS    SS:::::S     / \\ \\ /___/   \\ / \\   \\ / \\   \\     \n\
+   QQ::::::::::::::Q     K:::::::K    K:::::K    S::::::SSSSSS:::::S    /   \\___\\   \\___\\   \\___\\   \\___\\   \n\
+     QQ:::::::::::Q      K:::::::K    K:::::KK    S:::::::::::::::SS    \\   /   /   /   /   /   /   /   /          \n\
+      QQQQQQQQ::::QQ     KKKKKKKKK    KKKKKKKK     SSSSSSSSSSSSSSS       \\ /___/ \\ /___/ \\ /___/ \\ /___/        \n\
+               Q:::::Q                                                                                              \n\
+                QQQQQQ                                                                  \u00a9 Aritra Sarkar        \n\
+                                                                                                           \n\
 ###########################################################################################################\n\n'    
 print(welcome)
 
@@ -48,11 +48,11 @@ m_c			= 0.18
 neighbours 	= list(range(0,num_qb))		# Qubit ids of neighbours (currently full environment is visible to every agent)
 
 t_p			= 16384						# Number of time steps in the past considered by the agent at each point in time.
-t_f			= 1							# Number of time steps the agent predicts in the future. Single step	
+t_f			= 2							# Number of time steps the agent predicts in the future. Single step	
 gamma		= 0.00						# Reward discount that is proportional to the time span between the reward step and the current time step. Linear function
 R_R			= 0							# Reward threshold for reproduction. If R_t < R_R, the agent self-replicates with mutation in genes
 R_D			= 0							# Reward threshold for death. If R_t < R_D the agent halts (dies).
-lifespan	= 2000						# Max age of agent before death
+lifespan	= 10						# Max age of agent before death
 
 genes = [c_gene, wt_gene, l_max, e_max, a_max, s_max, t_max, m_c, neighbours, t_p, t_f, gamma, R_R, R_D, lifespan]
 
@@ -79,9 +79,9 @@ while (len(biosphere) + len(agt_waitlist) > 0):							# No agents alive, every a
 		
 	if abort == 1:														# User gets to choose each cycle (world clock tick) to abort or continue
 		for agt in biosphere:
-			print("Killing agent:",agt[0])
+			print("Aborting agent:",agt[0])
 			agt[1].halt()  									            # Run one perception cycle for the agent
-			aborted.append(agt[0])
+			aborted.append(agt)
 			biosphere.remove(agt)		
 		break
 	
@@ -96,7 +96,7 @@ while (len(biosphere) + len(agt_waitlist) > 0):							# No agents alive, every a
 			print("Running agent:",agt[0])
 		agt[1].run()  									                # Run one perception cycle for the agent
 		if agt[1].alive == False:										# If enough hazard has been encountered
-			run_log.append(agt[0])
+			run_log.append(agt)
 			biosphere.remove(agt)
 		if agt[1].newChildName != '':									# If agent reproduced in this cycle add child to the waitlist
 			if len(agt_waitlist) < max_queue:
@@ -114,10 +114,10 @@ from progress.bar import Bar
 
 print("\nFinal status --- \n\tRunning\t\t:",biosphere,"\n\tWaitlist\t:",list(agt_waitlist),"\n\tDead\t\t:",run_log,"\n\tAborted\t\t:",aborted)
 
-# for agt in run_log:
-# 	agt[1].log(desc="QSim_H_rand_DD")
-# 	plt.plot(list(agt[1].hist_r))
-# 	plt.ylabel('bures distance')
-# 	plt.ylim(0,1)
-# 	plt.show()
-# 	break
+for agt in run_log:
+	# agt[1].log(desc="QSim_H_rand_DD")
+	plt.plot(list(agt[1].LOG_TEST))
+	plt.ylabel('utility difference')
+	# plt.ylim(0,1)
+	plt.show()
+	break
