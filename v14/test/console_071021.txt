@@ -78,24 +78,24 @@ Current estimated environment:
 
 
 Hypervisor status ---
-        Running         : [['agent_0', <src.agent_0.agent object at 0x000001FBD3B98940>]]
+        Running         : [['agent_0', <src.agent_0.agent object at 0x000001D371408940>]]
         Waitlist        : []
         Dead            : []
 ===> 0: Continue  1: Abort  2: Auto [Default: 0]: 2
-   QPT strategy: EAQPT [0, <src.qpt_0.qpt object at 0x000001FB8399D9D0>, <src.environment.environment object at 0x000001FB84A5C520>]
+   QPT strategy: EAQPT [0, <src.qpt_0.qpt object at 0x000001D3214DEA90>, <src.environment.environment object at 0x000001D322310490>]
 
 Current estimated environment:
 
-(0.25+0j)  (-0.25-0.25j)  (0.25-0.25j)  (-0.5+0j)
-(-0.25+0.25j)  (0.25+0j)  -0.5j  (0.25-0.25j)
-(0.25+0.25j)  0.5j  (0.25+0j)  (-0.25-0.25j)
-(-0.5+0j)  (0.25+0.25j)  (-0.25+0.25j)  (0.25+0j)
+(0.25+0j)  (-0.25-0.25j)  (-0.25+0.25j)  (-0.5+0.5j)
+(-0.25+0.25j)  (0.25+0j)  0j  (-0.25+0.25j)
+(-0.25-0.25j)  0j  (0.25+0j)  (-0.25-0.25j)
+(-0.5-0.5j)  (-0.25-0.25j)  (-0.25+0.25j)  (0.25+0j)
 
 
 Final status ---
         Running         : []
         Waitlist        : []
-        Dead            : [['agent_0', <src.agent_0.agent object at 0x000001FBD3B98940>]]
+        Dead            : [['agent_0', <src.agent_0.agent object at 0x000001D371408940>]]
         Aborted         : []
 
 (qeait) D:\GoogleDrive\RESEARCH\A1 - Programs\QKSA\v14>
