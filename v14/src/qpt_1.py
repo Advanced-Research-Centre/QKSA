@@ -11,10 +11,12 @@ from numpy.lib.function_base import append
 from numpy.lib.shape_base import kron
 import random
 from qiskit import QuantumCircuit
+import time
 
 class qpt:
 
     name = 'AAQPT'
+    t_est = 0
 
     def __init__(self, num_qb_qp):
 
@@ -98,7 +100,7 @@ class qpt:
             return self.toStr(n//base,base) + convertString[n%base]
 
     def est_choi(self, hist_a, hist_e):
-
+        tic = time.perf_counter()
         self.hist_a		= hist_a		# History of actions
         self.hist_e		= hist_e		# History of perceptions
         self.ae_dict()    
@@ -115,6 +117,9 @@ class qpt:
             Si = sum(np.multiply(E, phist))
             est_rho += Si * B
         est_rho = est_rho/self.hsdim
+        # time.sleep(0.005)
+        toc = time.perf_counter()
+        self.t_est = toc - tic
         return est_rho
 
     def policy(self):

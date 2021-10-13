@@ -34,12 +34,12 @@ env.createEnv()
 # Mutable hyper-parameters genes
 
 c_gene		= 'F0F0F0V0V1V2F0V3V4' 		# Initial Seed AI simple cost function. Addition of 5 LEAST estimates.
-wt_gene		= [1, 0, 0, 0, 1]			# Weight assigned to LEAST metrics in current c_function.
-l_max		= 120				
+wt_gene		= [0.0001, 0, 0, 0, 1000]	# Weight assigned to LEAST metrics in current c_function.
+l_max		= 10000				
 e_max		= 0							# Currently not considered
 a_max		= 0							# Currently not considered
 s_max		= 0							# Currently not considered
-t_max		= 120				
+t_max		= 5				
 
 m_c			= 0.18
 
@@ -52,7 +52,7 @@ t_f			= 2							# Number of time steps the agent predicts in the future. Single 
 gamma		= 0.00						# Reward discount that is proportional to the time span between the reward step and the current time step. Linear function
 R_R			= 0							# Reward threshold for reproduction. If R_t < R_R, the agent self-replicates with mutation in genes
 R_D			= 0							# Reward threshold for death. If R_t < R_D the agent halts (dies).
-lifespan	= 200						# Max age of agent before death
+lifespan	= 15						# Max age of agent before death
 
 genes = [c_gene, wt_gene, l_max, e_max, a_max, s_max, t_max, m_c, neighbours, t_p, t_f, gamma, R_R, R_D, lifespan]
 

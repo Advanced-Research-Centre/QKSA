@@ -1,0 +1,154 @@
+
+(qeait) D:\GoogleDrive\RESEARCH\A1 - Programs\QKSA\v14>python QKSA.py
+
+
+###########################################################################################################
+
+        QQQQQQQQQ        KKKKKKKKK    KKKKKKKK       SSSSSSSSSSSSS                     ____
+     QQ:::::::::QQ       K:::::::K    K:::::KK     SS::::::::::::::S                 / \   \
+   QQ:::::::::::::QQ     K:::::::K    K::::::K    S:::::SSSSSS::::::S               /   \___\
+  Q:::::::QQQ:::::::Q    K:::::::K   K::::::K     S:::::S     SSSSSSS              _\   /   /__
+  Q::::::O   Q::::::Q    KK::::::K  K:::::KK      SS::::S                        / \ \ /_/ \   \
+  Q:::::O     Q:::::Q    K::::::K K:::::KK          SS::::::SS                  /   \___/   \___\
+  Q:::::O     Q:::::Q    K::::::K K:::::K            SSS:::::::SS              _\   /   \   /   /__
+  Q:::::O     Q:::::Q    K::::::K:::::K               SSSSSS::::SS           / \ \ /___/ \ /_/ \   \
+  Q:::::O  QQQQ:::::Q    K::::::KK:::::KK                  S:::::SS         /   \___\       /   \___\
+  Q::::::O Q::::::::Q    KK::::::K  K:::::KK                 S:::::S       _\   /   /__     \__ /  _/__
+  Q:::::::QQ::::::::Q    K:::::::K   K::::::K    SSSSSSS    SS:::::S     / \ \ /___/   \ / \   \ / \   \
+   QQ::::::::::::::Q     K:::::::K    K:::::K    S::::::SSSSSS:::::S    /   \___\   \___\   \___\   \___\
+     QQ:::::::::::Q      K:::::::K    K:::::KK    S:::::::::::::::SS    \   /   /   /   /   /   /   /   /
+      QQQQQQQQ::::QQ     KKKKKKKKK    KKKKKKKK     SSSSSSSSSSSSSSS       \ /___/ \ /___/ \ /___/ \ /___/
+               Q:::::Q
+                QQQQQQ                                                                  © Aritra Sarkar
+
+###########################################################################################################
+
+
+===> Specify number of qubits [Default: 1]:
+
+. . . environment being setup . . .
+
+        1: All-Zeros
+        2: Equal Superposition
+        3: GHZ-state
+        4: Random Pauli
+        5: Random U
+        6: Custom Test Env.
+
+===> Choose environment state [Default: 2]: 5
+Random U-gate state on 1 qubits selected
+
+     ┌────────────────────────┐
+q_0: ┤ U(2.328,2.0049,2.6998) ├
+     └────────────────────────┘
+
+. . . environment setup complete . . .
+
+Hypervisor status ---
+        Running         : []
+        Waitlist        : ['agent_0']
+        Dead            : []
+===> 0: Continue  1: Abort  2: Auto [Default: 0]:
+
+Creating Environment for agent_0 QPT algorithm EAQPT
+
+. . . environment being setup . . .
+
+1: Qiskit QASM simulator
+2: IBMQ Belem 5q
+
+Choose Environment Backend [Default: 1]:
+Qiskit QASM simulator backend selected
+
+      ░      ┌───┐ ░ ┌────┐ ░
+q_0: ─░──────┤ X ├─░─┤ QP ├─░─
+      ░ ┌───┐└─┬─┘ ░ └────┘ ░
+q_1: ─░─┤ H ├──■───░────────░─
+      ░ └───┘      ░        ░
+c: 2/═════════════════════════
+
+
+. . . environment setup complete . . .
+
+Creating Environment for agent_0 QPT algorithm AAQPT
+
+. . . environment being setup . . .
+
+1: Qiskit QASM simulator
+2: IBMQ Belem 5q
+
+Choose Environment Backend [Default: 1]:
+Qiskit QASM simulator backend selected
+
+      ░      ┌───┐ ░ ┌────┐ ░
+q_0: ─░──────┤ X ├─░─┤ QP ├─░─
+      ░ ┌───┐└─┬─┘ ░ └────┘ ░
+q_1: ─░─┤ H ├──■───░────────░─
+      ░ └───┘      ░        ░
+c: 2/═════════════════════════
+
+
+. . . environment setup complete . . .
+Running agent: agent_0
+Initial estimated environment:
+
+(0.25+0j)  0j  0j  0j
+0j  (0.25+0j)  0j  0j
+0j  0j  (0.25+0j)  0j
+0j  0j  0j  (0.25+0j)
+
+Initial estimated environment:
+
+(0.25+0j)  0j  0j  0j
+0j  (0.25+0j)  0j  0j
+0j  0j  (0.25+0j)  0j
+0j  0j  0j  (0.25+0j)
+
+Chosen QPT strategy for step 0  : EAQPT
+
+Hypervisor status ---
+        Running         : [['agent_0', <src.agent_0.agent object at 0x000002720F607F70>]]
+        Waitlist        : []
+        Dead            : []
+===> 0: Continue  1: Abort  2: Auto [Default: 0]: 2
+Chosen QPT strategy for step 1  : EAQPT
+Chosen QPT strategy for step 2  : EAQPT
+Chosen QPT strategy for step 3  : EAQPT
+Chosen QPT strategy for step 4  : AAQPT
+Chosen QPT strategy for step 5  : EAQPT
+Chosen QPT strategy for step 6  : AAQPT
+Chosen QPT strategy for step 7  : AAQPT
+Chosen QPT strategy for step 8  : EAQPT
+Chosen QPT strategy for step 9  : AAQPT
+Chosen QPT strategy for step 10  : AAQPT
+Chosen QPT strategy for step 11  : EAQPT
+Chosen QPT strategy for step 12  : EAQPT
+Chosen QPT strategy for step 13  : EAQPT
+Chosen QPT strategy for step 14  : EAQPT
+Chosen QPT strategy for step 15  : EAQPT
+   QPT strategy: EAQPT [0, <src.qpt_0.qpt object at 0x000002723F77D730>, <src.environment.environment object at 0x00000272405AB5E0>]
+
+Current estimated environment:
+
+(0.25+0j)  (-0.1388888888888889+0.25j)  (-0.25-0.25j)  0.5j
+(-0.1388888888888889-0.25j)  (0.25+0j)  (-0.5+0j)  (-0.25-0.25j)
+(-0.25+0.25j)  (-0.5+0j)  (0.25+0j)  (-0.1388888888888889+0.25j)
+-0.5j  (-0.25+0.25j)  (-0.1388888888888889-0.25j)  (0.25+0j)
+
+   QPT strategy: AAQPT [1, <src.qpt_1.qpt object at 0x00000272405ABAF0>, <src.environment.environment object at 0x00000272405ABBE0>]
+
+Current estimated environment:
+
+(0.25+0j)  (-0.1388888888888889+0.25j)  (-0.25-0.25j)  0.5j
+(-0.1388888888888889-0.25j)  (0.25+0j)  (-0.5+0j)  (-0.25-0.25j)
+(-0.25+0.25j)  (-0.5+0j)  (0.25+0j)  (-0.1388888888888889+0.25j)
+-0.5j  (-0.25+0.25j)  (-0.1388888888888889-0.25j)  (0.25+0j)
+
+
+Final status ---
+        Running         : []
+        Waitlist        : []
+        Dead            : [['agent_0', <src.agent_0.agent object at 0x000002720F607F70>]]
+        Aborted         : []
+
+(qeait) D:\GoogleDrive\RESEARCH\A1 - Programs\QKSA\v14>

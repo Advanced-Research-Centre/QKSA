@@ -7,6 +7,7 @@ import importlib
 import random
 import copy
 import numpy as np
+import os	
 from math import pi, floor, inf
 from numpy_ringbuffer import RingBuffer		# pip install numpy_ringbuffer
 from datetime import datetime
@@ -70,7 +71,7 @@ class agent:
 		self.metrics	= metrics()
 
 		# Make set of QPT objects based on available techniques
-		self.qptNos		= 1															# Number of QPT techniques to be considered
+		self.qptNos		= 2															# Number of QPT techniques to be considered
 		self.qptPool	= []
 		for i in range(0,self.qptNos):
 			agtClass = getattr(importlib.import_module('src.qpt_'+str(i)), "qpt")	# Filename changes for each qpt while class name remains same
@@ -97,9 +98,13 @@ class agent:
 		return e_t[0]
 
 	# Core method
-	def c_est(self, data):
+	def c_est(self, qpt):
 		# Cost estimator using LEAST metric and cost function 
-		est_least = [least.L_est(data), least.E_est(data), least.A_est(data), least.S_est(data), least.T_est(data)]
+		fname = 'src\\qpt_'+str(qpt[0])+'.py'
+		l_est = os.path.getsize(fname)
+		t_est = qpt[1].t_est
+		est_least = [l_est, 0, 0, 0, t_est]
+		# est_least = [least.L_est(data), least.E_est(data), least.A_est(data), least.S_est(data), least.T_est(data)]		# TBD
 		if (est_least[0] > self.l_max) or (est_least[1] > self.e_max) or (est_least[2] > self.a_max) or (est_least[3] > self.s_max) or (est_least[4] > self.t_max):
 			return -1
 		wt_least_est = [self.wt_gene[i] * est_least[i] for i in range(5)]
@@ -115,6 +120,7 @@ class agent:
 				elif self.c_gene[c+1] == '1':
 					stack.append(o1 * o2)		# F1: multiplication
 		c_est = stack.pop()
+		# print(est_least,wt_least_est,c_est)
 		return c_est
 
 	# Core method
@@ -283,21 +289,26 @@ dna=%r\n\
 		self.t_p_max = self.t if (self.t-self.t_p) < 0 else self.t_p	 # How much historic data is available (adjusted for initial few steps) for calculating return
 		
 		qpt_star = []
+		c_u_star = 10000000
 		for qpt in self.qptPool:					# For each process reconstruction algorithm (qpt)
 			
 			# print("   QPT strategy: "+qpt[1].name, qpt,'\n')
 
 			if self.t == 0:
 				rho_choi_curr = qpt[1].est_choi(self.hist_a, self.hist_e)
-				print("Current estimated environment:\n")
+				print("Initial estimated environment:\n")
 				for line in rho_choi_curr:
 					print ('  '.join(map(str, line)))
 				print()			
 		
 			# Run policy to use that qpt to generate best action and prediction based on estimated utility
 			a_t_star, u_pred_star = self.policy(qpt)		# Action chosen by the agent at time step t.
-			qpt_star = qpt
+			c_least_est = self.c_est(qpt)
+			if u_pred_star*c_least_est < c_u_star:			# Choose by weighted roulette?
+				c_u_star = u_pred_star*c_least_est
+				qpt_star = qpt
 
+		print("Chosen QPT strategy for step",self.t," :",qpt_star[1].name)
 		self.act(qpt_star[2], a_t_star)		# Action performed by the agent at time step t.
 		e_t = self.perceive(qpt_star[2])	# Perception recorded by the agent at time step t.
 		
