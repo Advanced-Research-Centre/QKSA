@@ -14,6 +14,7 @@ class qpt:
 
     name = 'EAQPT'
     t_est = 0
+    a_est = 5
 
     def __init__(self, num_qb_qp):
 
@@ -42,7 +43,7 @@ class qpt:
         self.ae_db = {}
         t= 0
         for i in self.hist_a:
-            if i[0] == "E":             # Filter only QST on maximally entangled states for AAQPT Choi matrix process tomography
+            if i[0] == 'E':             # Filter only QST on maximally entangled states for AAQPT Choi matrix process tomography
                 # print(i,self.hist_e[t])
                 if i[1] in self.ae_db:
                     self.ae_db[i[1]].append(self.hist_e[t])
@@ -113,7 +114,7 @@ class qpt:
             B,E = self.ev(ps)
             Si = sum(np.multiply(E, phist))
             est_rho += Si * B
-        est_rho = est_rho/self.hsdim
+        est_rho = np.round(est_rho/self.hsdim,self.a_est)
         toc = time.perf_counter()
         self.t_est = toc - tic
         return est_rho

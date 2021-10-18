@@ -95,8 +95,8 @@ class environment:
 	def define_A(self):
 		# define action space A as all 3-axis basis of self.num_qb qubits
 		self.A = []
-		for i in range(3**self.num_qb):
-			self.A.append(str(self.DecToBaseN(i,3,self.num_qb)))
+		for i in range(4**self.num_qb):
+			self.A.append(str(self.DecToBaseN(i,4,self.num_qb)))
 		return
 
 	def define_E(self):
@@ -117,6 +117,7 @@ class environment:
 			IBMQ.disable_account()
 
 	def action(self, a_t):
+		# self.basis = list(a_t[1])
 		self.basis = list(reversed(a_t[1]))
 		return
 

@@ -7,13 +7,14 @@ import importlib
 import random
 import copy
 import numpy as np
+from numpy.random import choice
 import os	
 from math import pi, floor, inf
 from numpy_ringbuffer import RingBuffer		# pip install numpy_ringbuffer
 from datetime import datetime
-from qiskit import QuantumCircuit, qasm, Aer, execute
-from qiskit import *
+from qiskit import QuantumCircuit
 import qiskit.quantum_info as qi
+from progress.bar import Bar
 
 class agent:
 				
@@ -35,7 +36,8 @@ class agent:
 	R_D			= 0							
 	lifespan	= 0
 
-	LOG_TEST = []						
+	LOG_TEST_1 = []		
+	LOG_TEST_2 = []				
 
 	def __init__(self, name, env, genes):
 				
@@ -71,7 +73,7 @@ class agent:
 		self.metrics	= metrics()
 
 		# Make set of QPT objects based on available techniques
-		self.qptNos		= 2															# Number of QPT techniques to be considered
+		self.qptNos		= 1															# Number of QPT techniques to be considered
 		self.qptPool	= []
 		for i in range(0,self.qptNos):
 			agtClass = getattr(importlib.import_module('src.qpt_'+str(i)), "qpt")	# Filename changes for each qpt while class name remains same
@@ -79,27 +81,38 @@ class agent:
 			exp_env = environment(agtObj.num_qb)
 			print("\nCreating Environment for "+self.name+" QPT algorithm "+agtObj.name)
 			exp_env.createEnv(agtObj.setup(self.env.qpCirc))
-			self.qptPool.append([i,agtObj,exp_env])
+			rho = qi.DensityMatrix.from_instruction(exp_env.qpCirc)           		# Actual Density Matrix
+			self.qptPool.append([i,agtObj,exp_env,rho.data])
 
 		self.newChildName 	= ''
 		self.childCtr 		= 0
 		self.alive			= True
 
+		self.agt_life = Bar('Progress...', width = 64, fill='█', max=self.lifespan, suffix = '%(index)d/%(max)d steps [%(elapsed)s / %(eta)d sec]')
+
 	# Core method
 	def act(self, env, a_t_star):
-		# check if a_t_star is a member of the set A, else raise error
+		'''
+		Pass action to the environment
+		TBD: raise error if a_t_star is not a member of the set A
+		'''
 		env.action(a_t_star)
 		return
 
 	# Core method
 	def perceive(self, env):
+		'''
+		Receive perception from the environment
+		TBD: raise error if e_t is not a member of the set E
+		'''
 		e_t = env.perception(list(range(0,env.num_qb)))
-		# check if e_t is a member of the set E, else raise error
 		return e_t[0]
 
 	# Core method
 	def c_est(self, qpt):
-		# Cost estimator using LEAST metric and cost function 
+		'''
+		Estimate cost using LEAST metric and cost function 
+		'''
 		fname = 'src\\qpt_'+str(qpt[0])+'.py'
 		l_est = os.path.getsize(fname)
 		t_est = qpt[1].t_est
@@ -125,21 +138,16 @@ class agent:
 
 	# Core method
 	def Delta(self, e_i, e_j):
-		# Distance function between elements in percept space
+		'''
+		Distance function between elements in percept space
+		'''
 		return self.metrics.DeltaTD(e_i, e_j)
 
 	# Utility method
-	def partialTrace1(self, dm):
-		# Partial trace of the lower significant subsystem of 2 qubits
-		dm1 = np.zeros((2,2)) * 0j
-		for i in range(0,2):
-			for j in range(0,2):
-				dm1[i][j] = dm[i][j]+dm[i+2][j+2]
-		return dm1
-
-	# Utility method
 	def toStr(self,n,base):
-		# Convert a decimal number to base-n
+		'''
+		Convert a decimal number to base-n
+		'''
 		convertString = "0123456789ABCDEF"
 		if n < base:
 			return convertString[n]
@@ -174,9 +182,15 @@ class agent:
 
 	# Core method
 	def predict(self, qpt, past_a, a_k, past_e, e_pred_k):
-		# Given hist of a,e, a_t and e_t, predict the probability of e_t	
+		'''
+		Given hist of a,e, a_t and e_t, predict the probability of e_t
+		'''
+		test = False
+		if (test == True):
+			lambda_e = 1/len(qpt[2].E)
+			return lambda_e
+
 		rho_choi = qpt[1].est_choi(past_a, past_e) # Current estimated environment from history of action and perception till last step (t-1)
-		# Perception based on rho_choi and a_t
 		pr_qcirc = QuantumCircuit(qpt[1].num_qb)
 		prb = list(reversed(a_k))
 		for i in range(0,len(prb)):
@@ -185,7 +199,7 @@ class agent:
 			elif prb[i] == '2':
 				pr_qcirc.rx(pi/2,i) 	# for measuring along Y
 		prU = qi.Operator(pr_qcirc)		# post-rotation unitary
-		pr_rho_choi = np.matmul(prU.data,  np.matmul(rho_choi, prU.conjugate().transpose().data) )
+		pr_rho_choi = np.matmul(prU.data,  np.matmul(rho_choi, prU.conjugate().transpose().data) )	# M rho M_dag
 		dist_pred = np.diag(np.real(pr_rho_choi))
 		lambda_e = dist_pred[int(e_pred_k,2)]
 		return lambda_e
@@ -195,26 +209,13 @@ class agent:
 		'''
 		Given the history, choose an action for the current step that would have the highest utility
 		'''
-		test = True
+		pbar = False
+		test = False
 		if (test == True):
 			a_t_star = random.choice(qpt[2].A)
+			u_pred_star = 1
+			return ['E', a_t_star], u_pred_star
 	
-		#
-		# for each t_f
-		#	reconstruct rho
-		#	max_util = -1; a_star = A[0]
-		#	for each action a
-		#		tot_util = 0
-		#		for each prediction e
-		#			find probability of e_pred as lambda_e_pred
-		#			reconstruct rho_pred
-		#			find utility u_pred as distance between rho and rho_pred
-		#			tot_util = lambda_e_pred * u_pred
-		#		if tot_util > max_util:
-		# 			max_util = tot_util
-		# 			a_star = a
-		#
-
 		rho_choi_t = qpt[1].est_choi(self.hist_a, self.hist_e)	# Current model of the environment [Get least cost while doing this]
 		dTree = {}
 		a_t_star = qpt[2].A[0]									# Optimal action for the agent determined by the policy at time step t	
@@ -232,6 +233,8 @@ class agent:
 						lambda_e_pred_new.append(self.predict(qpt, past_a, a_k, past_e, e_pred_k))
 						futureCone(k+1, past_a_new, past_e_new, lambda_e_pred_new)
 			else:
+				if pbar == True:
+					bar.next()
 				lambda_e_pred_m = 1									# Find total probability of sequence of predicted action-perception for t_f steps
 				for lambda_e_pred_k in lambda_e_pred:
 					lambda_e_pred_m *= lambda_e_pred_k
@@ -242,12 +245,26 @@ class agent:
 					dTree[a_t[1]] += lambda_e_pred_m*u_pred
 				else:
 					dTree[a_t[1]] = lambda_e_pred_m*u_pred
-
+		 
+		if pbar == True:
+			d_tree_sz = (len(qpt[2].A)*len(qpt[2].E))**self.t_f
+			bar = Bar('Progress...', width = 64, fill='█', max=d_tree_sz, suffix = '%(index)d/%(max)d steps [%(elapsed)s / %(eta)d sec]')
 		futureCone(self.t, list(self.hist_a), list(self.hist_e), [])
-		a_t_star = max(dTree, key=dTree.get)
-		u_pred_star = max(dTree.values())
-		
-		return ['E', a_t_star], u_pred_star
+		if pbar == True:
+			bar.finish()
+
+		# action with max utility (issue: never chooses certain actions, affects QPT reconstruction)
+		# a_t_star = max(dTree, key=dTree.get)
+		# u_pred_star = max(dTree.values())
+
+		# action weighted by utility
+		dlist = dTree.items()
+		nullBias = 0.2
+		pdist = [nullBias+delem[1] for delem in dlist]
+		draw = choice([delem[0] for delem in dlist], 1, p=pdist/sum(pdist))
+		u_pred_star = dTree[draw[0]]
+
+		return ['E', draw[0]], u_pred_star
 
 	# Core method
 	def mutate(self):
@@ -271,24 +288,28 @@ dna=%r\n\
 	# Core method
 	def halt(self):
 		for qpt in self.qptPool:
-			print("   QPT strategy: "+qpt[1].name, qpt,'\n')
+			print("\n   QPT strategy: "+qpt[1].name, '\n')
 			rho_choi_curr = qpt[1].est_choi(self.hist_a, self.hist_e)
-			print("Current estimated environment:\n")
+			print("Final estimated environment:\n")
 			for line in rho_choi_curr:
 				print ('  '.join(map(str, line)))
 			print()		
 		if hasattr(self, 'exp_env'):
 			self.exp_env.suspendEnv()
 		self.alive = False
+		self.agt_life.finish()
 		return
 
 	# Core method
 	def run(self):
 		# Loop handled by Hypervisor
-			
+		showQPT = False	
+		showLife = True
 		self.t_p_max = self.t if (self.t-self.t_p) < 0 else self.t_p	 # How much historic data is available (adjusted for initial few steps) for calculating return
 		
 		qpt_star = []
+		a_t_star = []
+		u_pred_star = []
 		c_u_star = 10000000
 		for qpt in self.qptPool:					# For each process reconstruction algorithm (qpt)
 			
@@ -296,19 +317,28 @@ dna=%r\n\
 
 			if self.t == 0:
 				rho_choi_curr = qpt[1].est_choi(self.hist_a, self.hist_e)
+				print("Target environment:\n")
+				for line in qpt[3]:
+					print ('  '.join(map(str, line)))
+				print()	
 				print("Initial estimated environment:\n")
 				for line in rho_choi_curr:
 					print ('  '.join(map(str, line)))
 				print()			
 		
 			# Run policy to use that qpt to generate best action and prediction based on estimated utility
-			a_t_star, u_pred_star = self.policy(qpt)		# Action chosen by the agent at time step t.
+			qpt_a_t, qpt_u_pred = self.policy(qpt)		# Action chosen by the agent at time step t.
 			c_least_est = self.c_est(qpt)
-			if u_pred_star*c_least_est < c_u_star:			# Choose by weighted roulette?
-				c_u_star = u_pred_star*c_least_est
+			if qpt_u_pred*c_least_est < c_u_star:			# Choose by weighted roulette?
+				c_u_star = qpt_u_pred*c_least_est
 				qpt_star = qpt
+				a_t_star = qpt_a_t
+				u_pred_star = qpt_u_pred
 
-		print("Chosen QPT strategy for step",self.t," :",qpt_star[1].name)
+		if showQPT == True:
+			print("Chosen QPT strategy for step",self.t," :",qpt_star[1].name, a_t_star)
+		elif showLife == True:
+			self.agt_life.next()
 		self.act(qpt_star[2], a_t_star)		# Action performed by the agent at time step t.
 		e_t = self.perceive(qpt_star[2])	# Perception recorded by the agent at time step t.
 		
@@ -319,7 +349,8 @@ dna=%r\n\
 		rho_choi_next = qpt_star[1].est_choi(self.hist_a, self.hist_e)
 		u_t = self.Delta(rho_choi_next, rho_choi_curr)
 		R_t = u_pred_star - u_t
-		self.LOG_TEST.append(R_t)
+		self.LOG_TEST_1.append(R_t)
+		self.LOG_TEST_2.append(u_pred_star)
 
 		self.newChildName = ''
 		if (self.R_t < self.R_R):								# Reproduce

@@ -1,0 +1,166 @@
+(qeait) D:\GoogleDrive\RESEARCH\A1 - Programs\QKSA\v14>python QKSA.py
+
+
+###########################################################################################################
+
+        QQQQQQQQQ        KKKKKKKKK    KKKKKKKK       SSSSSSSSSSSSS                     ____
+     QQ:::::::::QQ       K:::::::K    K:::::KK     SS::::::::::::::S                 / \   \
+   QQ:::::::::::::QQ     K:::::::K    K::::::K    S:::::SSSSSS::::::S               /   \___\
+  Q:::::::QQQ:::::::Q    K:::::::K   K::::::K     S:::::S     SSSSSSS              _\   /   /__
+  Q::::::O   Q::::::Q    KK::::::K  K:::::KK      SS::::S                        / \ \ /_/ \   \
+  Q:::::O     Q:::::Q    K::::::K K:::::KK          SS::::::SS                  /   \___/   \___\
+  Q:::::O     Q:::::Q    K::::::K K:::::K            SSS:::::::SS              _\   /   \   /   /__
+  Q:::::O     Q:::::Q    K::::::K:::::K               SSSSSS::::SS           / \ \ /___/ \ /_/ \   \
+  Q:::::O  QQQQ:::::Q    K::::::KK:::::KK                  S:::::SS         /   \___\       /   \___\
+  Q::::::O Q::::::::Q    KK::::::K  K:::::KK                 S:::::S       _\   /   /__     \__ /  _/__
+  Q:::::::QQ::::::::Q    K:::::::K   K::::::K    SSSSSSS    SS:::::S     / \ \ /___/   \ / \   \ / \   \
+   QQ::::::::::::::Q     K:::::::K    K:::::K    S::::::SSSSSS:::::S    /   \___\   \___\   \___\   \___\
+     QQ:::::::::::Q      K:::::::K    K:::::KK    S:::::::::::::::SS    \   /   /   /   /   /   /   /   /
+      QQQQQQQQ::::QQ     KKKKKKKKK    KKKKKKKK     SSSSSSSSSSSSSSS       \ /___/ \ /___/ \ /___/ \ /___/
+               Q:::::Q
+                QQQQQQ                                                                  © Aritra Sarkar
+
+###########################################################################################################
+
+
+===> Specify number of qubits [Default: 1]: 2
+
+. . . environment being setup . . .
+
+        1: All-Zeros
+        2: Equal Superposition
+        3: GHZ-state
+        4: Random Pauli
+        5: Random U
+        6: Custom Test Env.
+
+===> Choose environment state [Default: 2]: 2
+Equal Superposition state on 2 qubits selected
+
+     ┌───┐
+q_0: ┤ H ├
+     ├───┤
+q_1: ┤ H ├
+     └───┘
+
+. . . environment setup complete . . .
+
+Hypervisor status ---
+        Running         : []
+        Waitlist        : ['agent_0']
+        Dead            : []
+===> 0: Continue  1: Abort  2: Auto [Default: 0]: 2
+
+Creating Environment for agent_0 QPT algorithm EAQPT
+
+. . . environment being setup . . .
+
+1: Qiskit QASM simulator
+2: IBMQ Belem 5q
+
+Choose Environment Backend [Default: 1]: 1
+Qiskit QASM simulator backend selected
+
+      ░      ┌───┐      ░ ┌─────┐ ░
+q_0: ─░──────┤ X ├──────░─┤0    ├─░─
+      ░      └─┬─┘┌───┐ ░ │  QP │ ░
+q_1: ─░────────┼──┤ X ├─░─┤1    ├─░─
+      ░ ┌───┐  │  └─┬─┘ ░ └─────┘ ░
+q_2: ─░─┤ H ├──■────┼───░─────────░─
+      ░ ├───┤       │   ░         ░
+q_3: ─░─┤ H ├───────■───░─────────░─
+      ░ └───┘           ░         ░
+c: 4/═══════════════════════════════
+
+
+. . . environment setup complete . . .
+Initial estimated environment:
+
+(0.0625+0j)  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j
+0j  (0.0625+0j)  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j
+0j  0j  (0.0625+0j)  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j
+0j  0j  0j  (0.0625+0j)  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j
+0j  0j  0j  0j  (0.0625+0j)  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j
+0j  0j  0j  0j  0j  (0.0625+0j)  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j
+0j  0j  0j  0j  0j  0j  (0.0625+0j)  0j  0j  0j  0j  0j  0j  0j  0j  0j
+0j  0j  0j  0j  0j  0j  0j  (0.0625+0j)  0j  0j  0j  0j  0j  0j  0j  0j
+0j  0j  0j  0j  0j  0j  0j  0j  (0.0625+0j)  0j  0j  0j  0j  0j  0j  0j
+0j  0j  0j  0j  0j  0j  0j  0j  0j  (0.0625+0j)  0j  0j  0j  0j  0j  0j
+0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  (0.0625+0j)  0j  0j  0j  0j  0j
+0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  (0.0625+0j)  0j  0j  0j  0j
+0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  (0.0625+0j)  0j  0j  0j
+0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  (0.0625+0j)  0j  0j
+0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  (0.0625+0j)  0j
+0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  0j  (0.0625+0j)
+
+Progress... |████████████████████████████████████████████████████████████████| 1296/1296 steps [115 / 0 sec]
+Chosen QPT strategy for step 0  : EAQPT
+Progress... |████████████████████████████████████████████████████████████████| 1296/1296 steps [117 / 0 sec]
+Chosen QPT strategy for step 1  : EAQPT
+Progress... |████████████████████████████████████████████████████████████████| 1296/1296 steps [142 / 0 sec]
+Chosen QPT strategy for step 2  : EAQPT
+Progress... |████████████████████████████████████████████████████████████████| 1296/1296 steps [121 / 0 sec]
+Chosen QPT strategy for step 3  : EAQPT
+Progress... |████████████████████████████████████████████████████████████████| 1296/1296 steps [116 / 0 sec]
+Chosen QPT strategy for step 4  : EAQPT
+Progress... |████████████████████████████████████████████████████████████████| 1296/1296 steps [115 / 0 sec]
+Chosen QPT strategy for step 5  : EAQPT
+Progress... |████████████████████████████████████████████████████████████████| 1296/1296 steps [115 / 0 sec]
+Chosen QPT strategy for step 6  : EAQPT
+Progress... |████████████████████████████████████████████████████████████████| 1296/1296 steps [117 / 0 sec]
+Chosen QPT strategy for step 7  : EAQPT
+Progress... |████████████████████████████████████████████████████████████████| 1296/1296 steps [116 / 0 sec]
+Chosen QPT strategy for step 8  : EAQPT
+Progress... |████████████████████████████████████████████████████████████████| 1296/1296 steps [127 / 0 sec]
+Chosen QPT strategy for step 9  : EAQPT
+Progress... |████████████████████████████████████████████████████████████████| 1296/1296 steps [120 / 0 sec]
+Chosen QPT strategy for step 10  : EAQPT
+Progress... |████████████████████████████████████████████████████████████████| 1296/1296 steps [134 / 0 sec]
+Chosen QPT strategy for step 11  : EAQPT
+Progress... |████████████████████████████████████████████████████████████████| 1296/1296 steps [133 / 0 sec]
+Chosen QPT strategy for step 12  : EAQPT
+Progress... |████████████████████████████████████████████████████████████████| 1296/1296 steps [132 / 0 sec]
+Chosen QPT strategy for step 13  : EAQPT
+Progress... |████████████████████████████████████████████████████████████████| 1296/1296 steps [125 / 0 sec]
+Chosen QPT strategy for step 14  : EAQPT
+Progress... |████████████████████████████████████████████████████████████████| 1296/1296 steps [126 / 0 sec]
+Chosen QPT strategy for step 15  : EAQPT
+Progress... |████████████████████████████████████████████████████████████████| 1296/1296 steps [132 / 0 sec]
+Chosen QPT strategy for step 16  : EAQPT
+Progress... |████████████████████████████████████████████████████████████████| 1296/1296 steps [137 / 0 sec]
+Chosen QPT strategy for step 17  : EAQPT
+Progress... |████████████████████████████████████████████████████████████████| 1296/1296 steps [128 / 0 sec]
+Chosen QPT strategy for step 18  : EAQPT
+Progress... |████████████████████████████████████████████████████████████████| 1296/1296 steps [127 / 0 sec]
+Chosen QPT strategy for step 19  : EAQPT
+Progress... |████████████████████████████████████████████████████████████████| 1296/1296 steps [121 / 0 sec]
+Chosen QPT strategy for step 20  : EAQPT
+   QPT strategy: EAQPT [0, <src.qpt_0.qpt object at 0x0000025F4DDCEAF0>, <src.environment.environment object at 0x0000025F4EBFC6D0>]
+
+Current estimated environment:
+
+(0.0625+0j)  (-0.0625+0j)  0j  0j  0j  0j  0j  (-0.0625-0.0625j)  0j  0j  0j  (-0.0625-0.0625j)  0j  (-0.0625+0.0625j)  (0.0625-0.0625j)  (0.0625+0.3125j)
+(-0.0625+0j)  (0.0625+0j)  0j  0j  0j  0j  (-0.0625+0.0625j)  0j  0j  0j  (-0.0625+0.0625j)  0j  (-0.0625-0.0625j)  0j  (0.1875+0.0625j)  (0.0625-0.0625j)
+0j  0j  (0.0625+0j)  (-0.0625+0j)  0j  (-0.0625-0.0625j)  0j  0j  0j  (-0.0625-0.0625j)  0j  0j  (0.0625+0.0625j)  (-0.0625-0.0625j)  0j  (-0.0625+0.0625j)
+0j  0j  (-0.0625+0j)  (0.0625+0j)  (-0.0625+0.0625j)  0j  0j  0j  (-0.0625+0.0625j)  0j  0j  0j  (-0.1875-0.0625j)  (0.0625+0.0625j)  (-0.0625-0.0625j)  0j
+0j  0j  0j  (-0.0625-0.0625j)  (0.0625+0j)  (-0.0625+0j)  0j  0j  0j  (-0.0625+0.0625j)  (0.0625-0.0625j)  (-0.3125-0.0625j)  0j  0j  0j  (-0.0625-0.0625j)
+0j  0j  (-0.0625+0.0625j)  0j  (-0.0625+0j)  (0.0625+0j)  0j  0j  (-0.0625-0.0625j)  0j  (0.0625-0.0625j)  (0.0625-0.0625j)  0j  0j  (-0.0625+0.0625j)  0j
+0j  (-0.0625-0.0625j)  0j  0j  0j  0j  (0.0625+0j)  (-0.0625+0j)  (0.0625+0.0625j)  (-0.1875+0.0625j)  0j  (-0.0625+0.0625j)  0j  (-0.0625-0.0625j)  0j  0j
+(-0.0625+0.0625j)  0j  0j  0j  0j  0j  (-0.0625+0j)  (0.0625+0j)  (-0.0625-0.1875j)  (0.0625+0.0625j)  (-0.0625-0.0625j)  0j  (-0.0625+0.0625j)  0j  0j  0j
+0j  0j  0j  (-0.0625-0.0625j)  0j  (-0.0625+0.0625j)  (0.0625-0.0625j)  (-0.0625+0.1875j)  (0.0625+0j)  (-0.0625+0j)  0j  0j  0j  0j  0j  (-0.0625-0.0625j)
+0j  0j  (-0.0625+0.0625j)  0j  (-0.0625-0.0625j)  0j  (-0.1875-0.0625j)  (0.0625-0.0625j)  (-0.0625+0j)  (0.0625+0j)  0j  0j  0j  0j  (-0.0625+0.0625j)  0j
+0j  (-0.0625-0.0625j)  0j  0j  (0.0625+0.0625j)  (0.0625+0.0625j)  0j  (-0.0625+0.0625j)  0j  0j  (0.0625+0j)  (-0.0625+0j)  0j  (-0.0625-0.0625j)  0j  0j
+(-0.0625+0.0625j)  0j  0j  0j  (-0.3125+0.0625j)  (0.0625+0.0625j)  (-0.0625-0.0625j)  0j  0j  0j  (-0.0625+0j)  (0.0625+0j)  (-0.0625+0.0625j)  0j  0j  0j
+0j  (-0.0625+0.0625j)  (0.0625-0.0625j)  (-0.1875+0.0625j)  0j  0j  0j  (-0.0625-0.0625j)  0j  0j  0j  (-0.0625-0.0625j)  (0.0625+0j)  (-0.0625+0j)  0j  0j
+(-0.0625-0.0625j)  0j  (-0.0625+0.0625j)  (0.0625-0.0625j)  0j  0j  (-0.0625+0.0625j)  0j  0j  0j  (-0.0625+0.0625j)  0j  (-0.0625+0j)  (0.0625+0j)  0j  0j
+(0.0625+0.0625j)  (0.1875-0.0625j)  0j  (-0.0625+0.0625j)  0j  (-0.0625-0.0625j)  0j  0j  0j  (-0.0625-0.0625j)  0j  0j  0j  0j  (0.0625+0j)  (-0.0625+0j)
+(0.0625-0.3125j)  (0.0625+0.0625j)  (-0.0625-0.0625j)  0j  (-0.0625+0.0625j)  0j  0j  0j  (-0.0625+0.0625j)  0j  0j  0j  0j  0j  (-0.0625+0j)  (0.0625+0j)
+
+
+Final status ---
+        Running         : []
+        Waitlist        : []
+        Dead            : [['agent_0', <src.agent_0.agent object at 0x0000025F1DEEFD60>]]
+        Aborted         : []
+←[?25h
+(qeait) D:\GoogleDrive\RESEARCH\A1 - Programs\QKSA\v14>
