@@ -156,6 +156,9 @@ class agent:
 
 	# Test method
 	def loadHist(self, fname):
+		'''
+		Load history (from previous sessions) from file
+		'''
 		# USAGE: self.loadHist("data/AAQPT_full.txt")						
 		# USAGE: rho_choi_full = self.exp.est_choi(self.hist_a, self.hist_e)
 		fobj = open(fname, "r")
@@ -171,6 +174,9 @@ class agent:
 
 	# Test method
 	def log(self, desc):
+		'''
+		Log raw data for analytics
+		'''
 		fname = open("results/runlog_"+desc+".txt", "a")
 		now = datetime.now()
 		fname.write("\n"+str(now)+"\n")
@@ -268,15 +274,20 @@ class agent:
 
 	# Core method
 	def mutate(self):
-		# mutate current agent's gene
+		'''
+		Mutate current agent's gene
+		'''
 		genes_new = self.genes
 		return genes_new
 
 	# Core method
 	def constructor(self, genes):
+		'''
+		Self-replicate agent code with mutated gene
+		'''
 		f = open('src/'+self.newChildName+'.py', "w")
 		# The expression below is used to automatically convert the embed the code within the f.write
-		# QUINE = FALSE
+		# QUINE = 0
 		dna = '\
 dna=%r\n\
 \tf.write(dna%%(dna,genes))\n\
@@ -287,6 +298,9 @@ dna=%r\n\
 
 	# Core method
 	def halt(self):
+		'''
+		Cleanup activities when agent is terminated automatically/manually
+		'''
 		for qpt in self.qptPool:
 			print("\n   QPT strategy: "+qpt[1].name, '\n')
 			rho_choi_curr = qpt[1].est_choi(self.hist_a, self.hist_e)

@@ -15,6 +15,7 @@ class qpt:
     name = 'EAQPT'
     t_est = 0
     a_est = 5
+    s_est = 16384
 
     def __init__(self, num_qb_qp):
 
