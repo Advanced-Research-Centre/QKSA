@@ -37,7 +37,9 @@ class agent:
 	lifespan	= 0
 
 	LOG_TEST_1 = []		
-	LOG_TEST_2 = []				
+	LOG_TEST_2 = []		
+	LOG_TEST_3 = []			
+	LOG_TEST_4 = []			
 
 	def __init__(self, name, env, genes):
 				
@@ -141,7 +143,7 @@ class agent:
 		'''
 		Distance function between elements in percept space
 		'''
-		return self.metrics.DeltaTD(e_i, e_j)
+		return self.metrics.DeltaHS(e_i, e_j)
 
 	# Utility method
 	def toStr(self,n,base):
@@ -171,20 +173,6 @@ class agent:
 				self.hist_e.append(res[i:i+2])
 				i += 6
 		fobj.close()
-
-	# Test method
-	def log(self, desc):
-		'''
-		Log raw data for analytics
-		'''
-		fname = open("results/runlog_"+desc+".txt", "a")
-		now = datetime.now()
-		fname.write("\n"+str(now)+"\n")
-		fname.write("\n"+str(desc)+"\n")
-		for r in self.hist_r:
-			fname.write(str(r)+"\n")
-		fname.close()
-		return
 
 	# Core method
 	def predict(self, qpt, past_a, a_k, past_e, e_pred_k):
@@ -265,7 +253,7 @@ class agent:
 
 		# action weighted by utility
 		dlist = dTree.items()
-		nullBias = 0.2
+		nullBias = 0.2												# Such that even Identity is chosen
 		pdist = [nullBias+delem[1] for delem in dlist]
 		draw = choice([delem[0] for delem in dlist], 1, p=pdist/sum(pdist))
 		u_pred_star = dTree[draw[0]]
@@ -296,6 +284,19 @@ dna=%r\n\
 		f.close()
 		return
 
+	# Test method
+	def log(self, name, desc, data):
+		'''
+		Log raw data for analytics
+		'''
+		fname = open("results/runlog_"+name+".txt", "a")
+		now = datetime.now()
+		fname.write("\n"+str(now)+"\n")
+		fname.write("\n"+str(desc)+"\n")
+		fname.write(str(data)+"\n")
+		fname.close()
+		return
+
 	# Core method
 	def halt(self):
 		'''
@@ -311,7 +312,8 @@ dna=%r\n\
 		if hasattr(self, 'exp_env'):
 			self.exp_env.suspendEnv()
 		self.alive = False
-		self.agt_life.finish()
+		self.agt_life.finish()				# Progress Bar
+		self.log("H-E-1024","Learn Hadamard EAQPT",[self.LOG_TEST_1, self.LOG_TEST_2, self.LOG_TEST_3])
 		return
 
 	# Core method
@@ -343,8 +345,8 @@ dna=%r\n\
 			# Run policy to use that qpt to generate best action and prediction based on estimated utility
 			qpt_a_t, qpt_u_pred = self.policy(qpt)		# Action chosen by the agent at time step t.
 			c_least_est = self.c_est(qpt)
-			if qpt_u_pred*c_least_est < c_u_star:			# Choose by weighted roulette?
-				c_u_star = qpt_u_pred*c_least_est
+			if qpt_u_pred * 2**(-c_least_est) < c_u_star:			# Choose by weighted roulette?
+				c_u_star = qpt_u_pred * 2**(-c_least_est)
 				qpt_star = qpt
 				a_t_star = qpt_a_t
 				u_pred_star = qpt_u_pred
@@ -353,18 +355,24 @@ dna=%r\n\
 			print("Chosen QPT strategy for step",self.t," :",qpt_star[1].name, a_t_star)
 		elif showLife == True:
 			self.agt_life.next()
+
 		self.act(qpt_star[2], a_t_star)		# Action performed by the agent at time step t.
 		e_t = self.perceive(qpt_star[2])	# Perception recorded by the agent at time step t.
 		
-		# Use that on qpt to get new model and access reward/return/utility
+		# Use that on qpt to get new model
 		rho_choi_curr = qpt_star[1].est_choi(self.hist_a, self.hist_e)
 		self.hist_a.append(a_t_star)		# Update action history
 		self.hist_e.append(e_t)				# Update perception history
 		rho_choi_next = qpt_star[1].est_choi(self.hist_a, self.hist_e)
+		# Assess actual utility
 		u_t = self.Delta(rho_choi_next, rho_choi_curr)
+		# Calculate Knowledge Gain
 		R_t = u_pred_star - u_t
-		self.LOG_TEST_1.append(R_t)
-		self.LOG_TEST_2.append(u_pred_star)
+		
+		self.LOG_TEST_1.append(u_pred_star)
+		self.LOG_TEST_2.append(u_t)
+		self.LOG_TEST_3.append(R_t)
+		self.LOG_TEST_4.append(self.Delta(rho_choi_curr,qpt_star[3]))
 
 		self.newChildName = ''
 		if (self.R_t < self.R_R):								# Reproduce

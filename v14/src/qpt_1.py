@@ -16,6 +16,9 @@ import time
 class qpt:
 
     name = 'AAQPT'
+    e_est = 0
+    a_est = 8
+    s_est = 16384
     t_est = 0
 
     def __init__(self, num_qb_qp):

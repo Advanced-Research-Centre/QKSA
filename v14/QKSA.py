@@ -61,7 +61,7 @@ t_f			= 1									# Number of time steps the agent predicts in the future. Singl
 gamma		= 0.00								# Reward discount that is proportional to the time span between the reward step and the current time step. Linear function
 R_R			= 0									# Reward threshold for reproduction. If R_t < R_R, the agent self-replicates with mutation in genes
 R_D			= 0									# Reward threshold for death. If R_t < R_D the agent halts (dies).
-lifespan	= 1024								# Max age of agent before death
+lifespan	= 124								# Max age of agent before death
 
 genes = [c_gene, wt_gene, l_max, e_max, a_max, s_max, t_max, m_c, neighbours, t_p, t_f, gamma, R_R, R_D, lifespan]
 
@@ -133,14 +133,25 @@ print("\nFinal status --- \n\tRunning\t\t:",biosphere,"\n\tWaitlist\t:",list(agt
 import matplotlib.pyplot as plt
 
 for agt in run_log:
-	ax1 = plt.subplot(2,1,1)
+	ax1 = plt.subplot(2,2,1)
 	plt.plot(list(agt[1].LOG_TEST_1))
-	plt.ylabel('utility difference')
+	plt.ylabel('predicted utility')
 	plt.ylim(-1.5,1.5)
 
-	ax1 = plt.subplot(2,1,2, sharex=ax1)
+	ax2 = plt.subplot(2,2,2, sharex=ax1)
 	plt.plot(list(agt[1].LOG_TEST_2))
-	plt.ylabel('predicted utility')
+	plt.ylabel('perceived utility')
 	plt.ylim(-0.5,1.5)
+
+	ax3 = plt.subplot(2,2,3, sharex=ax1)
+	plt.plot(list(agt[1].LOG_TEST_3))
+	plt.ylabel('knowledge gain')
+	plt.ylim(-0.5,1.5)
+
+	ax4 = plt.subplot(2,2,4, sharex=ax1)
+	plt.plot(list(agt[1].LOG_TEST_4))
+	plt.ylabel('remaining utility')
+	plt.ylim(-0.5,1.5)
+
 	plt.show()
 	break

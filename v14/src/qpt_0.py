@@ -13,10 +13,11 @@ import time
 class qpt:
 
     name = 'EAQPT'
-    t_est = 0
+    e_est = 0
     a_est = 5
     s_est = 16384
-
+    t_est = 0
+    
     def __init__(self, num_qb_qp):
 
         self.num_qb     = num_qb_qp*2                # Number of qubits required for process tomography
