@@ -143,7 +143,7 @@ class agent:
 		'''
 		Distance function between elements in percept space
 		'''
-		return self.metrics.DeltaHS(e_i, e_j)
+		return self.metrics.DeltaT(e_i, e_j)
 
 	# Utility method
 	def toStr(self,n,base):
@@ -313,7 +313,7 @@ dna=%r\n\
 			self.exp_env.suspendEnv()
 		self.alive = False
 		self.agt_life.finish()				# Progress Bar
-		self.log("H-E-1024","Learn Hadamard EAQPT",[self.LOG_TEST_1, self.LOG_TEST_2, self.LOG_TEST_3])
+		self.log("H-E-T-16384","Learn Hadamard EAQPT TraceDistance over 16384 cycles",[self.LOG_TEST_1, self.LOG_TEST_2, self.LOG_TEST_3])
 		return
 
 	# Core method

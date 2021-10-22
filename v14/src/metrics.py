@@ -59,49 +59,47 @@ Test properties of Distance Measures
 E.g. distance between the complete mixed state and a pure state should not be zero
 '''
 
-from qiskit import QuantumCircuit
+# from qiskit import QuantumCircuit
 
-# Completely Mixed State
-A = np.array([[0.25,0,0,0], 
-     [0,0.25,0,0], 
-     [0,0,0.25,0], 
-     [0,0,0,0.25]])
+# # Completely Mixed State
+# A = np.array([[0.25,0,0,0], 
+#      [0,0.25,0,0], 
+#      [0,0,0.25,0], 
+#      [0,0,0,0.25]])
 
-# Hadamard Operator (Plus State)
-B = np.array([[0.25,0.25,0.25,-0.25], 
-     [0.25,0.25,0.25,-0.25], 
-     [0.25,0.25,0.25,-0.25], 
-     [-0.25,-0.25,-0.25,0.25]])
+# # Hadamard Operator (Plus State)
+# B = np.array([[0.25,0.25,0.25,-0.25], 
+#      [0.25,0.25,0.25,-0.25], 
+#      [0.25,0.25,0.25,-0.25], 
+#      [-0.25,-0.25,-0.25,0.25]])
 
-# Hadamard Operator (Plus State)
-D = np.array([[1,0,0,0], 
-     [0,0,0,0], 
-     [0,0,0,0], 
-     [0,0,0,0]])
+# # Hadamard Operator (Plus State)
+# D = np.array([[1,0,0,0], 
+#      [0,0,0,0], 
+#      [0,0,0,0], 
+#      [0,0,0,0]])
 
-qcirc = QuantumCircuit(2, 2)
-qcirc.h(1)
-qcirc.cx(1,0)
-qcirc.h(0)
-C = qi.DensityMatrix.from_instruction(qcirc).data
+# qcirc = QuantumCircuit(2, 2)
+# qcirc.h(1)
+# qcirc.cx(1,0)
+# qcirc.h(0)
+# C = qi.DensityMatrix.from_instruction(qcirc).data
 
-qcirc = QuantumCircuit(2, 2)
-qcirc.h(1)
-qcirc.cx(1,0)
-E = qi.DensityMatrix.from_instruction(qcirc).data
-print(C) 
+# qcirc = QuantumCircuit(2, 2)
+# qcirc.h(1)
+# qcirc.cx(1,0)
+# E = qi.DensityMatrix.from_instruction(qcirc).data
+# print(C) 
 
-M = metrics()
-# print("T: ",M.DeltaT(A,B))
-print("T: ",M.DeltaT(A,C))
-print("B: ",M.DeltaB(A,C))
-print("HS: ",M.DeltaHS(A,C))
-# print("H: ",M.DeltaH(A,B))
-
-
-print("T: ",M.DeltaT(A,E))
-print("B: ",M.DeltaB(A,E))
-print("HS: ",M.DeltaHS(A,E))
+# M = metrics()
+# # print("T: ",M.DeltaT(A,B))
+# print("T: ",M.DeltaT(A,C))
+# print("B: ",M.DeltaB(A,C))
+# print("HS: ",M.DeltaHS(A,C))
+# # print("H: ",M.DeltaH(A,B))
 
 
+# print("T: ",M.DeltaT(A,E))
+# print("B: ",M.DeltaB(A,E))
+# print("HS: ",M.DeltaHS(A,E))
 		
