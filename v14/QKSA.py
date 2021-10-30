@@ -170,7 +170,6 @@ while EXP > 0:
 	import pickle
 
 	for agt in run_log:
-		print(EXP,len(agt[1].LOG_TEST_1))
 		with open('results/'+NAME+'-'+str(EXP)+'.pkl', 'wb') as f:
 			pickle.dump([agt[1].LOG_TEST_1, agt[1].LOG_TEST_2, agt[1].LOG_TEST_3, agt[1].LOG_TEST_4], f)
 
