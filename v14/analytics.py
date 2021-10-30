@@ -1,8 +1,8 @@
 import pickle
 import matplotlib.pyplot as plt
 
-EXP = 3
-NAME = 'U-E-T-200'
+EXP = 20
+NAME = 'U-E-T-1024'
 
 while EXP > 0:
     with open('results/'+NAME+'-'+str(EXP)+'.pkl', 'rb') as f:

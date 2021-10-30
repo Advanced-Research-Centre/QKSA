@@ -8,7 +8,7 @@ EXP = 1
 if ATS == True:
 	LOG_RES = True
 	VIS_RES = False
-	EXP = 10	
+	EXP = 20	
 
 qksa = '\n\n\
 ###########################################################################################################\n\
@@ -78,7 +78,7 @@ while EXP > 0:
 	gamma		= 0.00								# Reward discount that is proportional to the time span between the reward step and the current time step. Linear function
 	R_R			= 0									# Reward threshold for reproduction. If R_t < R_R, the agent self-replicates with mutation in genes
 	R_D			= 0									# Reward threshold for death. If R_t < R_D the agent halts (dies).
-	lifespan	= 200								# Max age of agent before death
+	lifespan	= 1024								# Max age of agent before death
 
 	genes = [c_gene, wt_gene, l_max, e_max, a_max, s_max, t_max, m_c, neighbours, t_p, t_f, gamma, R_R, R_D, lifespan]
 
