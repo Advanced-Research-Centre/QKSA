@@ -11,7 +11,6 @@ from numpy.random import choice
 import os	
 from math import pi, floor, inf
 from numpy_ringbuffer import RingBuffer		# pip install numpy_ringbuffer
-from datetime import datetime
 from qiskit import QuantumCircuit
 import qiskit.quantum_info as qi
 from progress.bar import Bar
@@ -91,6 +90,10 @@ class agent:
 		self.alive			= True
 
 		self.agt_life = Bar('Progress...', width = 64, fill='█', max=self.lifespan, suffix = '%(index)d/%(max)d steps [%(elapsed)s / %(eta)d sec]')
+		self.LOG_TEST_1 = []		
+		self.LOG_TEST_2 = []		
+		self.LOG_TEST_3 = []			
+		self.LOG_TEST_4 = []	
 
 	# Core method
 	def act(self, env, a_t_star):
@@ -284,19 +287,6 @@ dna=%r\n\
 		f.close()
 		return
 
-	# Test method
-	def log(self, name, desc, data):
-		'''
-		Log raw data for analytics
-		'''
-		fname = open("results/runlog_"+name+".txt", "a")
-		now = datetime.now()
-		fname.write("\n"+str(now)+"\n")
-		fname.write("\n"+str(desc)+"\n")
-		fname.write(str(data)+"\n")
-		fname.close()
-		return
-
 	# Core method
 	def halt(self):
 		'''
@@ -313,7 +303,6 @@ dna=%r\n\
 			self.exp_env.suspendEnv()
 		self.alive = False
 		self.agt_life.finish()				# Progress Bar
-		self.log("H-E-T-16384","Learn Hadamard EAQPT TraceDistance over 16384 cycles",[self.LOG_TEST_1, self.LOG_TEST_2, self.LOG_TEST_3])
 		return
 
 	# Core method

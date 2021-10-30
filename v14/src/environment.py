@@ -6,6 +6,8 @@ import sys
 from qiskit import QuantumCircuit, Aer, execute, IBMQ
 from qiskit.tools.monitor import job_monitor
 
+ATS = True
+
 class environment:
 
 	num_qb = 0					# Number of qubits the environment is defined on
@@ -24,7 +26,11 @@ class environment:
 		print("\n. . . environment being setup . . .\n")	
 		if qcirc is None:
 			qcirc = QuantumCircuit(self.num_qb)
-			stateSel = int(input("\t1: All-Zeros\n\t2: Equal Superposition\n\t3: GHZ-state\n\t4: Random Pauli\n\t5: Random U\n\t6: Custom Test Env.\n\n===> Choose environment state [Default: 2]: ") or "2")
+			if ATS == True:
+				stateSel = 5		# Define value for automatic testing
+			else:
+				stateSel = int(input("\t1: All-Zeros\n\t2: Equal Superposition\n\t3: GHZ-state\n\t4: Random Pauli\n\t5: Random U\n\t6: Custom Test Env.\n\n===> Choose environment state [Default: 2]: ") or "2")
+			
 			if stateSel == 1:
 				print("All-Zero state on "+str(self.num_qb)+" qubits selected")
 			elif stateSel == 2:
@@ -64,7 +70,10 @@ class environment:
 			else:
 				print("Invalid selection! Default All-Zero state on "+str(self.num_qb)+" qubits selected")
 		else:
-			backendSel = int(input("1: Qiskit QASM simulator\n2: IBMQ Belem 5q\n\nChoose Environment Backend [Default: 1]: ") or "1")
+			if ATS == True:
+				backendSel = 1		# Define value for automatic testing
+			else:
+				backendSel = int(input("1: Qiskit QASM simulator\n2: IBMQ Belem 5q\n\nChoose Environment Backend [Default: 1]: ") or "1")
 			if backendSel == 1:
 				print("Qiskit QASM simulator backend selected")
 				self.backend = Aer.get_backend(self.qcsim)
